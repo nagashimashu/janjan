@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08182a">
+  <meta name="description" content="ブラウザーだけで遊べる一人用の麻雀ゲーム。牌操作デモ・何切る問題・CPU四人麻雀。">
+  <title>星翠麻雀</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/lobby.css">
+  <link rel="stylesheet" href="css/table.css">
+  <link rel="stylesheet" href="css/tiles.css">
+  <link rel="stylesheet" href="css/effects.css">
+</head>
+<body>
+  <!-- アニメ調の背景（装飾のみ） -->
+  <div class="sky" aria-hidden="true">
+    <span class="sky-orb o1"></span><span class="sky-orb o2"></span><span class="sky-orb o3"></span>
+    <span class="sky-cloud c1"></span><span class="sky-cloud c2"></span>
+    <span class="sky-stars"></span>
+  </div>
+
+  <main id="app">
+
+    <!-- 1. タイトル画面 -->
+    <section class="screen screen-title" data-screen="title" hidden>
+      <div class="title-hero">
+        <svg class="emblem" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="emb-gold" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#fff1bf"/><stop offset=".5" stop-color="#e5bd5c"/><stop offset="1" stop-color="#a8791e"/>
+            </linearGradient>
+            <linearGradient id="emb-jade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7ff0cf"/><stop offset="1" stop-color="#138a6c"/>
+            </linearGradient>
+          </defs>
+          <polygon points="60,6 107,33 107,87 60,114 13,87 13,33" fill="rgba(10,30,50,.7)" stroke="url(#emb-gold)" stroke-width="4"/>
+          <polygon points="60,20 95,40 95,80 60,100 25,80 25,40" fill="none" stroke="url(#emb-jade)" stroke-width="2" opacity=".8"/>
+          <path d="M60 30 L67 52 L90 52 L71 65 L78 88 L60 74 L42 88 L49 65 L30 52 L53 52 Z" fill="url(#emb-gold)"/>
+          <circle cx="60" cy="60" r="7" fill="url(#emb-jade)"/>
+        </svg>
+        <h1 class="title-logo">星翠麻雀</h1>
+        <p class="title-sub">SEISUI MAHJONG</p>
+        <p class="title-lead">ブラウザーだけで遊べる、ひとり用の麻雀</p>
+        <button type="button" class="btn btn-primary btn-xl" data-nav="modes">はじめる</button>
+        <p class="title-version"><span id="app-version"></span> ・ 試作版</p>
+      </div>
+    </section>
+
+    <!-- 2. モード選択画面 -->
+    <section class="screen screen-modes" data-screen="modes" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="title" aria-label="タイトルへ戻る">‹</button>
+        <h2 tabindex="-1">モード選択</h2>
+        <span class="header-spacer"></span>
+      </header>
+
+      <div class="mode-grid">
+        <article class="mode-card theme-jade">
+          <div class="mode-art" aria-hidden="true" data-tiles="5m6z8p"></div>
+          <h3>牌操作デモ</h3>
+          <p>配牌・ツモ・打牌・整列などの基本操作と演出を体験できます。</p>
+          <dl class="mode-meta">
+            <div><dt>難易度</dt><dd>入門</dd></div>
+            <div><dt>推奨端末</dt><dd>すべて（縦向き可）</dd></div>
+          </dl>
+          <button type="button" class="btn btn-primary" data-nav="demo">プレイ</button>
+        </article>
+
+        <article class="mode-card theme-violet is-planned">
+          <div class="mode-art" aria-hidden="true" data-tiles="3m0p7s"></div>
+          <h3>何切る問題 <span class="badge badge-planned">準備中</span></h3>
+          <p>14枚から1枚を選び、シャンテン数・受入枚数・狙える役を学ぶモードです。</p>
+          <dl class="mode-meta">
+            <div><dt>難易度</dt><dd>初級〜中級</dd></div>
+            <div><dt>推奨端末</dt><dd>スマホ縦・PC</dd></div>
+          </dl>
+          <button type="button" class="btn btn-ghost" data-nav="nanikiru">内容を見る（フェーズ2）</button>
+        </article>
+
+        <article class="mode-card theme-gold is-planned">
+          <div class="mode-art" aria-hidden="true" data-backs="3"></div>
+          <h3>CPU四人麻雀 <span class="badge badge-planned">準備中</span></h3>
+          <p>CPU3人と東風戦で対局します。喰いタンあり・赤ドラあり。</p>
+          <dl class="mode-meta">
+            <div><dt>難易度</dt><dd>中級</dd></div>
+            <div><dt>推奨端末</dt><dd>PC・タブレット・スマホ横</dd></div>
+          </dl>
+          <button type="button" class="btn btn-ghost" data-nav="cpu">内容を見る（フェーズ3〜6）</button>
+        </article>
+      </div>
+
+      <nav class="lobby-nav" aria-label="メニュー">
+        <button type="button" class="nav-tile" data-nav="howto"><span aria-hidden="true">？</span>遊び方</button>
+        <button type="button" class="nav-tile" data-nav="rules"><span aria-hidden="true">≣</span>ルール設定</button>
+        <button type="button" class="nav-tile" data-nav="settings"><span aria-hidden="true">⚙</span>設定・音量</button>
+        <button type="button" class="nav-tile" data-nav="stats"><span aria-hidden="true">★</span>戦績</button>
+        <button type="button" class="nav-tile" data-nav="about"><span aria-hidden="true">i</span>更新履歴・クレジット</button>
+        <button type="button" class="nav-tile nav-danger" data-reset-data><span aria-hidden="true">↺</span>データ初期化</button>
+      </nav>
+    </section>
+
+    <!-- 4. 牌操作デモ画面 -->
+    <section class="screen play-screen" id="screen-demo" data-screen="demo" hidden>
+      <header class="play-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 class="play-title" tabindex="-1">牌操作デモ</h2>
+        <button type="button" class="btn-icon" data-open-menu aria-label="メニューを開く">≡</button>
+      </header>
+
+      <div class="table-wrap">
+        <div class="table">
+          <div class="table-info">
+            <div class="info-chip">
+              <span class="wall-stack" id="demo-wall-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>残り <b id="demo-remaining">0</b> 枚</span>
+            </div>
+            <div class="info-chip dora-chip">
+              <span class="chip-label">ドラ表示</span>
+              <span id="demo-dora-ind" class="dora-slot"></span>
+              <span class="chip-label">ドラ</span><b id="demo-dora-name">-</b>
+            </div>
+            <div class="info-chip"><span class="chip-label">巡目</span><b id="demo-turn">0</b></div>
+          </div>
+
+          <div class="river-area is-empty" id="demo-river-area">
+            <div class="river" id="demo-river" role="list" aria-label="河（捨て牌）"></div>
+            <p class="river-empty">捨てた牌がここに6枚ずつ並びます</p>
+          </div>
+
+          <div class="table-banner" id="demo-banner" hidden>
+            <p><strong>流局</strong>山がなくなりました</p>
+            <button type="button" class="btn btn-primary" id="demo-banner-deal">もう一度配牌</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hand-zone" id="demo-hand-zone">
+        <p class="status-line" id="demo-status"></p>
+        <div class="hand" id="demo-hand" role="group" aria-label="手牌（左右キーで移動、Enterで選択・打牌）"></div>
+        <p class="hint">タップで選択・もう一度で打牌 ／ 上スワイプで打牌 ／ 長押し・Iキーで牌の情報 ／ ←→・Enter・T（ツモ）・S（整列）</p>
+      </div>
+
+      <nav class="action-bar" aria-label="デモ操作">
+        <button type="button" class="btn act" id="demo-btn-deal"><span class="act-icon" aria-hidden="true">↻</span>配牌</button>
+        <button type="button" class="btn act act-strong" id="demo-btn-draw"><span class="act-icon" aria-hidden="true">＋</span>ツモ</button>
+        <button type="button" class="btn act act-discard" id="demo-btn-discard"><span class="act-icon" aria-hidden="true">↑</span><span>この牌を切る<span class="btn-sub">未選択</span></span></button>
+        <button type="button" class="btn act" id="demo-btn-sort"><span class="act-icon" aria-hidden="true">⇅</span>整列</button>
+        <button type="button" class="btn act" id="demo-btn-load"><span class="act-icon" aria-hidden="true">✎</span>手牌読込</button>
+      </nav>
+    </section>
+
+    <!-- 5・6. 何切る問題（フェーズ2で実装） -->
+    <section class="screen screen-page" data-screen="nanikiru" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">何切る問題</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body">
+        <div class="notice notice-planned">
+          <strong>このモードは未実装です（フェーズ2で実装予定）</strong>
+          <p>現在の版では遊べません。実装予定の内容は以下のとおりです。</p>
+        </div>
+        <ul class="plan-list">
+          <li>サンプル問題10問以上（難易度・自風・場風・ドラ・巡目つき）</li>
+          <li>回答後にシャンテン数・受入牌・受入枚数・狙える役・解説を表示</li>
+          <li>評価は「最有力／有力／目的により可／改善余地あり」の4段階</li>
+          <li>問題一覧・難易度絞り込み・前後の問題への移動</li>
+          <li>成績（挑戦数・正答数・正答率）の保存とリセット</li>
+          <li>未レビューの問題には「確認中」と表示</li>
+        </ul>
+        <button type="button" class="btn btn-primary" data-nav="demo">牌操作デモで遊ぶ</button>
+      </div>
+    </section>
+
+    <!-- 7〜9. CPU四人麻雀（フェーズ3〜6で実装） -->
+    <section class="screen screen-page" data-screen="cpu" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">CPU四人麻雀</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body">
+        <div class="notice notice-planned">
+          <strong>このモードは未実装です（フェーズ3〜6で実装予定）</strong>
+          <p>現在の版では対局できません。実装予定の内容は以下のとおりです。</p>
+        </div>
+        <ul class="plan-list">
+          <li>フェーズ3：4人への配牌、ツモ・打牌の進行、CPU打牌、流局</li>
+          <li>フェーズ4：ロン・ツモ判定、主要役の判定、符・翻・点数計算</li>
+          <li>フェーズ5：ポン・チー・カン・リーチ、演出、CPUレベル1〜3</li>
+          <li>フェーズ6：東風戦の完走、連荘・本場・供託・順位、戦績保存</li>
+        </ul>
+        <button type="button" class="btn btn-primary" data-nav="demo">牌操作デモで遊ぶ</button>
+      </div>
+    </section>
+
+    <!-- 3. ルール設定画面 -->
+    <section class="screen screen-page" data-screen="rules" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">ルール設定</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body">
+        <p class="page-lead">試作版の標準ルールです。「未実装」のルールは値だけを保持しており、対応するモードの実装後に反映されます。ルールの変更機能はCPU四人麻雀の実装時に追加します。</p>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th scope="col">項目</th><th scope="col">設定値</th><th scope="col">状態</th><th scope="col">備考</th></tr></thead>
+            <tbody id="rules-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 設定画面 -->
+    <section class="screen screen-page" data-screen="settings" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">設定</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body">
+        <p class="page-lead">設定はこの端末のブラウザーにだけ保存されます。</p>
+        <div class="settings-form" id="settings-form"></div>
+      </div>
+    </section>
+
+    <!-- 10. 戦績画面 -->
+    <section class="screen screen-page" data-screen="stats" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">戦績</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body">
+        <div class="stat-grid" id="stats-body"></div>
+        <button type="button" class="btn btn-ghost btn-danger-ghost" data-reset-data>データ初期化</button>
+      </div>
+    </section>
+
+    <!-- 11. 遊び方画面 -->
+    <section class="screen screen-page" data-screen="howto" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">遊び方</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body prose">
+        <h3>牌操作デモ</h3>
+        <ol>
+          <li>画面を開くと13枚が配られます。「ツモ」で1枚引いて14枚にします。</li>
+          <li>牌をタップ（クリック）すると選択され、上に浮きます。</li>
+          <li>選択中の牌をもう一度タップすると、その牌を河へ捨てます。</li>
+          <li>牌を上方向へはじく（スワイプ）と、すぐに捨てられます。</li>
+          <li>「この牌を切る」ボタンでも打牌できます。</li>
+          <li>牌を長押しすると、名前・赤ドラ・ドラ・ツモ牌などの情報を表示します。</li>
+        </ol>
+        <p>打牌方法と誤打牌防止は「設定」で変更できます。誤打牌防止がオンのとき、1回目の操作は選択だけになります。</p>
+        <h3>キーボード操作</h3>
+        <table class="data-table">
+          <tbody>
+            <tr><th scope="row">← →</th><td>牌を移動</td></tr>
+            <tr><th scope="row">Enter／Space</th><td>選択・打牌</td></tr>
+            <tr><th scope="row">T</th><td>ツモ</td></tr>
+            <tr><th scope="row">S</th><td>整列</td></tr>
+            <tr><th scope="row">D</th><td>選択中の牌を切る</td></tr>
+            <tr><th scope="row">I</th><td>牌の情報を表示</td></tr>
+          </tbody>
+        </table>
+        <h3>テスト用の牌山</h3>
+        <p>「手牌読込」で、手牌（13枚または14枚）、ツモ順、シードを指定できます。表記は <code>123m456p789s1122z</code> 形式です（m=萬子、p=筒子、s=索子、z=字牌 1〜7が東南西北白發中、0=赤5）。</p>
+      </div>
+    </section>
+
+    <!-- 12. 更新履歴・クレジット画面 -->
+    <section class="screen screen-page" data-screen="about" hidden>
+      <header class="page-header">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 tabindex="-1">更新履歴・クレジット</h2>
+        <span class="header-spacer"></span>
+      </header>
+      <div class="page-body prose">
+        <h3>更新履歴</h3>
+        <div id="changelog-body"></div>
+        <h3>クレジット</h3>
+        <ul>
+          <li>画面デザイン・牌のデザイン・エンブレム：本プロジェクトのオリジナル（HTML／CSS／SVG）</li>
+          <li>効果音：Web Audio API による合成音（音声ファイルは使用していません）</li>
+          <li>外部画像・外部フォント・外部ライブラリは使用していません</li>
+          <li>既存の麻雀ゲームの画面・ロゴ・キャラクター・牌画像・音声は使用していません</li>
+        </ul>
+        <h3>保存するデータ</h3>
+        <p>この端末のブラウザー（localStorage）に、設定と成績だけを保存します。個人情報は収集しません。</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 対局中メニュー -->
+  <dialog id="dlg-menu" class="dlg dlg-sheet" aria-labelledby="menu-title">
+    <form method="dialog">
+      <h2 id="menu-title" class="dlg-title">メニュー</h2>
+      <div class="settings-form compact" id="menu-settings"></div>
+      <div class="dlg-links">
+        <button type="button" class="btn btn-ghost" data-nav="howto">遊び方</button>
+        <button type="button" class="btn btn-ghost" data-nav="settings">すべての設定</button>
+        <button type="button" class="btn btn-ghost" data-nav="modes">モード選択へ</button>
+      </div>
+      <div class="dlg-actions">
+        <button type="submit" class="btn btn-primary" value="close">閉じる</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 手牌読込（テスト用固定牌山） -->
+  <dialog id="dlg-load" class="dlg" aria-labelledby="load-title">
+    <form method="dialog">
+      <h2 id="load-title" class="dlg-title">手牌読込（テスト用）</h2>
+      <label class="field">
+        <span>手牌（13枚または14枚。空欄ならランダム）</span>
+        <input name="hand" inputmode="text" autocomplete="off" spellcheck="false" placeholder="例：123m406p789s1122z">
+      </label>
+      <label class="field">
+        <span>ツモ順（配牌後に引く牌を先頭から指定・任意）</span>
+        <input name="draws" autocomplete="off" spellcheck="false" placeholder="例：5z3m">
+      </label>
+      <label class="field">
+        <span>シード（同じ値なら同じ牌山・任意）</span>
+        <input name="seed" autocomplete="off" spellcheck="false" placeholder="数字または文字列">
+      </label>
+      <div class="sample-row">
+        <span>サンプル：</span>
+        <button type="button" class="chip-btn" data-sample="1112345678999m">九蓮形</button>
+        <button type="button" class="chip-btn" data-sample="19m19p19s1234567z">国士形</button>
+        <button type="button" class="chip-btn" data-sample="11223344m556677p" data-draws="7p">七対子形</button>
+        <button type="button" class="chip-btn" data-sample="234m406p678s11z555z">赤ドラ入り</button>
+      </div>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="dlg-actions">
+        <button type="submit" class="btn btn-ghost" value="cancel" formnovalidate>キャンセル</button>
+        <button type="submit" class="btn btn-primary" value="load">この牌山で配牌</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 確認ダイアログ -->
+  <dialog id="dlg-confirm" class="dlg" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title" class="dlg-title">確認</h2>
+      <p class="dlg-msg"></p>
+      <div class="dlg-actions">
+        <button type="submit" class="btn btn-ghost" value="cancel">キャンセル</button>
+        <button type="submit" class="btn btn-primary" value="ok">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="tile-info" class="tile-info" role="tooltip" hidden></div>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <div id="fx-layer" class="fx-layer" aria-hidden="true"></div>
+
+  <aside id="debug-panel" class="debug-panel" hidden aria-label="デバッグ情報">
+    <strong>DEBUG</strong>
+    <pre class="debug-state"></pre>
+    <pre class="debug-log"></pre>
+  </aside>
+
+  <!-- file:// でも動くよう、ES Modules ではなく通常の script で読み込む（順序に依存） -->
+  <script src="js/constants.js"></script>
+  <script src="data/rules.js"></script>
+  <script src="data/changelog.js"></script>
+  <script src="js/tiles.js"></script>
+  <script src="js/wall.js"></script>
+  <script src="js/hand-sorter.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/animation.js"></script>
+  <script src="js/tile-art.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/debug.js"></script>
+  <script src="js/modes/demo-model.js"></script>
+  <script src="js/modes/demo.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

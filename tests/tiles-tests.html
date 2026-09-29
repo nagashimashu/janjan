@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>牌・牌山・デモ進行テスト | 星翠麻雀</title>
+  <link rel="stylesheet" href="test-page.css">
+</head>
+<body>
+  <h1>牌・牌山・デモ進行テスト</h1>
+  <p><a href="index.html">テスト一覧へ</a></p>
+  <div id="out"></div>
+
+  <script src="../js/constants.js"></script>
+  <script src="../data/rules.js"></script>
+  <script src="../js/tiles.js"></script>
+  <script src="../js/wall.js"></script>
+  <script src="../js/hand-sorter.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modes/demo-model.js"></script>
+  <script src="test-runner.js"></script>
+  <script src="specs/tiles.spec.js"></script>
+  <script src="specs/demo-model.spec.js"></script>
+  <script>MJTest.renderToDom(MJTest.run(), document.getElementById('out'));</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>テスト一覧 | 星翠麻雀</title>
+  <link rel="stylesheet" href="test-page.css">
+</head>
+<body>
+  <h1>テスト一覧</h1>
+  <table>
+    <thead><tr><th>テスト</th><th>対象</th><th>状態</th></tr></thead>
+    <tbody>
+      <tr><td><a href="tiles-tests.html">tiles-tests.html</a></td><td>牌生成・表記・ドラ・整列・牌山・デモ進行・保存データ</td><td class="pass">実装済み</td></tr>
+      <tr><td>shanten-tests.html</td><td>シャンテン数・受入（七対子・国士無双を含む）</td><td>フェーズ2で追加</td></tr>
+      <tr><td>agari-tests.html</td><td>通常形・七対子・国士無双・鳴きあり</td><td>フェーズ4で追加</td></tr>
+      <tr><td>yaku-tests.html</td><td>主要役・食い下がり・複合・役なし・役満</td><td>フェーズ4で追加</td></tr>
+      <tr><td>scoring-tests.html</td><td>符・翻・親子・ロン／ツモ・本場・供託・切り上げ</td><td>フェーズ4で追加</td></tr>
+    </tbody>
+  </table>
+  <p>Node.js がある環境では <code>node tests/run-node.js</code> でも同じテストを実行できます。</p>
+  <p><a href="../index.html">ゲームへ戻る</a></p>
+</body>
+</html>

@@ -1,0 +1,162 @@
+/* 麻雀牌：アイボリーの牌面＋翡翠色の背（厚み）＋光沢。サイズは --tile-w で決まる */
+.tile {
+  --w: var(--tile-w, 44px);
+  --th: calc(var(--w) * .1);   /* 牌の厚み */
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--w);
+  height: calc(var(--w) * 1.36);
+  margin-bottom: var(--th);
+  border-radius: calc(var(--w) * .14);
+  background: linear-gradient(165deg, #fffef8 0%, #f7f0de 55%, #e8dcbc 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 3px rgba(130, 105, 60, .28),
+    0 var(--th) 0 #2fae8f,
+    0 calc(var(--th) + 1px) 0 #125c4b,
+    0 calc(var(--th) + 3px) 7px rgba(0, 0, 0, .45);
+  overflow: hidden;
+}
+.tile svg { display: block; width: 100%; height: 100%; padding: 6% 4%; pointer-events: none; }
+/* 光沢 */
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, .7) 0%, rgba(255, 255, 255, 0) 32%),
+    linear-gradient(0deg, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, .35));
+  pointer-events: none;
+}
+/* 赤ドラ：淡い紅色の牌面と金の縁（SVG側の菱形マークでも区別） */
+.tile.is-red {
+  background: linear-gradient(165deg, #fff7f2 0%, #fbe6dd 55%, #efcfbf 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(207, 47, 61, .55),
+    inset 0 -2px 3px rgba(130, 60, 60, .28),
+    0 var(--th) 0 #2fae8f,
+    0 calc(var(--th) + 1px) 0 #125c4b,
+    0 calc(var(--th) + 3px) 7px rgba(0, 0, 0, .45);
+}
+
+/* 伏せ牌：濃紺と紫の装飾柄 */
+.tile-back {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(233, 196, 106, .55) 0 12%, transparent 13%),
+    repeating-linear-gradient(45deg, rgba(233, 196, 106, .18) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(-45deg, rgba(233, 196, 106, .18) 0 2px, transparent 2px 7px),
+    linear-gradient(160deg, #6a52c9 0%, #33236f 60%, #1a1446 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(233, 196, 106, .55),
+    0 var(--th) 0 #efe6cc,
+    0 calc(var(--th) + 1px) 0 #9a8c68,
+    0 calc(var(--th) + 3px) 7px rgba(0, 0, 0, .45);
+}
+
+.tile-mini { --tile-w: 24px; }
+.tile-river { --tile-w: var(--river-w, 30px); }
+.tile-river.is-tsumogiri { filter: brightness(.86) saturate(.85); }
+.tile-art { --tile-w: 44px; }
+
+/* ---------- 操作できる手牌 ---------- */
+.tile-btn {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* 見た目より広いタップ領域（上方向に広く取る） */
+  padding: calc(var(--tile-w) * .3) 1px 6px;
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: pan-x;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.tile-btn .tile { transition: transform .16s cubic-bezier(.2, .8, .3, 1.2), filter .2s, box-shadow .2s; }
+.tile-btn.is-drawn { margin-left: calc(var(--tile-w) * .45); }
+
+@media (hover: hover) and (pointer: fine) {
+  .tile-btn:hover .tile { transform: translateY(-4px) scale(1.06); }
+  .tile-btn.is-selected:hover .tile { transform: translateY(-30%) scale(1.06); }
+}
+
+/* 選択中：浮き上がり＋金の縁＋上の▼マーク（色だけに頼らない） */
+.tile-btn.is-selected .tile {
+  transform: translateY(-30%);
+  box-shadow:
+    0 0 0 2px #fff4c7,
+    0 0 0 4px var(--gold),
+    0 0 18px 4px rgba(233, 196, 106, .65),
+    0 var(--th) 0 #2fae8f,
+    0 calc(var(--th) + 1px) 0 #125c4b;
+}
+.tile-btn.is-selected::before {
+  content: "▼";
+  position: absolute;
+  top: calc(var(--tile-w) * -.34);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: max(10px, calc(var(--tile-w) * .28));
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(233, 196, 106, .8);
+  pointer-events: none;
+}
+/* ドラの手牌：下辺に小さな「ド」マーク */
+.tile-btn.is-dora::after {
+  content: "ド";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 3px;
+  border-radius: 4px;
+  font-size: max(8px, calc(var(--tile-w) * .2));
+  line-height: 1.2;
+  font-weight: 800;
+  color: #2b1d02;
+  background: var(--gold);
+  pointer-events: none;
+}
+
+.tile-btn:focus-visible { outline: none; }
+.tile-btn:focus-visible .tile { outline: 3px solid var(--jade); outline-offset: 3px; }
+
+/* ツモ前など打牌できない状態（押すと理由を表示） */
+.hand.is-waiting .tile-btn .tile { filter: brightness(.8) saturate(.75); }
+.hand.is-locked .tile-btn { cursor: progress; }
+
+/* スワイプ中：指に追従。打牌ラインを越えたら発光 */
+.tile-btn.is-dragging { z-index: 3; }
+.tile-btn.is-dragging .tile { transition: none; }
+.tile-btn.is-armed .tile { box-shadow: 0 0 0 3px var(--jade), 0 0 24px 6px rgba(70, 214, 174, .7); }
+
+/* 長押しの補足表示 */
+.tile-info {
+  position: fixed;
+  z-index: 55;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 120px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line-gold);
+  box-shadow: var(--shadow);
+  transform: translate(-50%, -100%);
+  font-size: .85rem;
+  pointer-events: none;
+  text-align: center;
+}
+.tile-info strong { font-size: 1.05rem; color: var(--gold); }
+.tile-info-code { font-family: ui-monospace, Consolas, monospace; color: var(--muted); font-size: .75rem; }

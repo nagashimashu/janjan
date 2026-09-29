@@ -1,0 +1,88 @@
+/* 背景・発光・粒子。prefers-reduced-motion と「演出少なめ」で簡略化する */
+
+/* ---------- アニメ調の背景 ---------- */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(80% 60% at 15% 0%, rgba(165, 139, 255, .35), transparent 60%),
+    radial-gradient(70% 55% at 90% 10%, rgba(70, 214, 174, .28), transparent 60%),
+    radial-gradient(90% 60% at 50% 110%, rgba(233, 196, 106, .18), transparent 60%),
+    linear-gradient(180deg, #0b1f3d 0%, #081a30 45%, #061120 100%);
+}
+.sky-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: .55;
+  animation: orb-drift 18s ease-in-out infinite alternate;
+}
+.sky-orb.o1 { width: 42vmax; height: 42vmax; left: -12vmax; top: 30%; background: rgba(118, 90, 240, .45); }
+.sky-orb.o2 { width: 36vmax; height: 36vmax; right: -10vmax; top: -8vmax; background: rgba(46, 190, 160, .4); animation-duration: 22s; }
+.sky-orb.o3 { width: 26vmax; height: 26vmax; left: 40%; bottom: -12vmax; background: rgba(255, 150, 190, .25); animation-duration: 26s; }
+.sky-cloud {
+  position: absolute;
+  height: 70px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  box-shadow: 40px -20px 0 10px rgba(255, 255, 255, .05), 100px 0 0 0 rgba(255, 255, 255, .05);
+  animation: cloud-move 60s linear infinite;
+}
+.sky-cloud.c1 { width: 180px; top: 16%; left: -260px; }
+.sky-cloud.c2 { width: 240px; top: 62%; left: -320px; animation-duration: 85s; animation-delay: -30s; }
+.sky-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 32% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 68% 18%, #fdf1c4 50%, transparent 51%),
+    radial-gradient(1px 1px at 82% 34%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 72%, #c9fff0 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 84%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 70%, #fff 50%, transparent 51%);
+  opacity: .7;
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+
+@keyframes orb-drift { to { transform: translate(6vmax, -4vmax) scale(1.08); } }
+@keyframes cloud-move { to { transform: translateX(calc(100vw + 600px)); } }
+@keyframes twinkle { to { opacity: .35; } }
+
+/* ---------- 発光・粒子 ---------- */
+.fx-layer { position: fixed; inset: 0; z-index: 50; pointer-events: none; overflow: hidden; }
+.fx-particle {
+  position: absolute;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  will-change: transform, opacity;
+}
+.fx-fly { position: fixed; margin: 0; will-change: transform, opacity; }
+.fx-fly.tile-btn .tile { transform: none; box-shadow: 0 10px 18px rgba(0, 0, 0, .5); }
+.fx-glow { animation: fx-glow .8s ease-out; }
+@keyframes fx-glow {
+  0% { filter: drop-shadow(0 0 0 rgba(233, 196, 106, 0)); }
+  30% { filter: drop-shadow(0 0 10px rgba(233, 196, 106, .95)) brightness(1.12); }
+  100% { filter: drop-shadow(0 0 0 rgba(233, 196, 106, 0)); }
+}
+
+/* ---------- 演出の簡略化 ---------- */
+html[data-anim="minimal"] .sky-orb,
+html[data-anim="minimal"] .sky-cloud,
+html[data-anim="minimal"] .sky-stars,
+html[data-anim="minimal"] .emblem { animation: none; }
+html[data-anim="minimal"] .fx-glow { animation: none; }
+html[data-anim="minimal"] .tile-btn .tile { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .sky-cloud { display: none; }
+}
