@@ -23,6 +23,10 @@
 - 麻雀ロジック（`js/*.js`）とモデル（`js/modes/*-model.js`）は DOM に触れない。DOM・入力は画面コントローラー（`js/modes/*.js`）だけが扱う
 - 定数は `js/constants.js`、ルールは `data/rules.js`、設定項目は `js/storage.js` の `SETTINGS_SCHEMA` に置く
 - 牌面の見た目は `js/tile-art.js` だけで決める（差し替え可能にするため）
+- 手牌のタップ・スワイプ・長押し・キーボード操作は `js/hand-input.js`（`MJ.handInput`）を使う。モードごとに入力処理を書かない
+- シャンテン数・受入は `js/shanten.js`・`js/ukeire.js` を使う。問題データやCPUの中で別の計算をしない
+- CPU四人麻雀の状態は `js/game-engine.js` の関数だけで変更する。画面側（`js/modes/match.js`）は状態を読んで描画し、進行のタイミングを決めるだけにする
+- CPUの判断は `js/cpu-player.js` に置き、判断理由と評価値を必ず返す（デバッグパネルで確認できるようにするため）
 
 ### UI
 

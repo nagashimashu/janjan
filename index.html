@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/lobby.css">
   <link rel="stylesheet" href="css/table.css">
   <link rel="stylesheet" href="css/tiles.css">
+  <link rel="stylesheet" href="css/nanikiru.css">
+  <link rel="stylesheet" href="css/match.css">
   <link rel="stylesheet" href="css/effects.css">
 </head>
 <body>
@@ -67,26 +69,26 @@
           <button type="button" class="btn btn-primary" data-nav="demo">プレイ</button>
         </article>
 
-        <article class="mode-card theme-violet is-planned">
+        <article class="mode-card theme-violet">
           <div class="mode-art" aria-hidden="true" data-tiles="3m0p7s"></div>
-          <h3>何切る問題 <span class="badge badge-planned">準備中</span></h3>
-          <p>14枚から1枚を選び、シャンテン数・受入枚数・狙える役を学ぶモードです。</p>
+          <h3>何切る問題</h3>
+          <p>14枚から1枚を選び、シャンテン数・受入枚数・狙える役を学ぶモードです。全10問。</p>
           <dl class="mode-meta">
-            <div><dt>難易度</dt><dd>初級〜中級</dd></div>
+            <div><dt>難易度</dt><dd>初級〜上級</dd></div>
             <div><dt>推奨端末</dt><dd>スマホ縦・PC</dd></div>
           </dl>
-          <button type="button" class="btn btn-ghost" data-nav="nanikiru">内容を見る（フェーズ2）</button>
+          <button type="button" class="btn btn-primary" data-nav="nanikiru">プレイ</button>
         </article>
 
-        <article class="mode-card theme-gold is-planned">
+        <article class="mode-card theme-gold">
           <div class="mode-art" aria-hidden="true" data-backs="3"></div>
-          <h3>CPU四人麻雀 <span class="badge badge-planned">準備中</span></h3>
-          <p>CPU3人と東風戦で対局します。喰いタンあり・赤ドラあり。</p>
+          <h3>CPU四人麻雀 <span class="badge badge-planned">試作</span></h3>
+          <p>CPU3人と東風戦で対局します。現在は基本進行（ツモ・打牌・流局）まで。和了・鳴き・リーチは未実装です。</p>
           <dl class="mode-meta">
             <div><dt>難易度</dt><dd>中級</dd></div>
             <div><dt>推奨端末</dt><dd>PC・タブレット・スマホ横</dd></div>
           </dl>
-          <button type="button" class="btn btn-ghost" data-nav="cpu">内容を見る（フェーズ3〜6）</button>
+          <button type="button" class="btn btn-primary" data-nav="cpu">プレイ</button>
         </article>
       </div>
 
@@ -150,7 +152,7 @@
       </nav>
     </section>
 
-    <!-- 5・6. 何切る問題（フェーズ2で実装） -->
+    <!-- 5. 何切る問題一覧 -->
     <section class="screen screen-page" data-screen="nanikiru" hidden>
       <header class="page-header">
         <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
@@ -158,42 +160,148 @@
         <span class="header-spacer"></span>
       </header>
       <div class="page-body">
-        <div class="notice notice-planned">
-          <strong>このモードは未実装です（フェーズ2で実装予定）</strong>
-          <p>現在の版では遊べません。実装予定の内容は以下のとおりです。</p>
+        <div class="nk-stats" aria-label="成績">
+          <div><span>挑戦数</span><b id="nk-stat-attempts">0</b></div>
+          <div><span>正答数</span><b id="nk-stat-correct">0</b></div>
+          <div><span>正答率</span><b id="nk-stat-rate">—</b></div>
+          <button type="button" class="btn btn-ghost btn-danger-ghost btn-sm" id="nk-reset">成績リセット</button>
         </div>
-        <ul class="plan-list">
-          <li>サンプル問題10問以上（難易度・自風・場風・ドラ・巡目つき）</li>
-          <li>回答後にシャンテン数・受入牌・受入枚数・狙える役・解説を表示</li>
-          <li>評価は「最有力／有力／目的により可／改善余地あり」の4段階</li>
-          <li>問題一覧・難易度絞り込み・前後の問題への移動</li>
-          <li>成績（挑戦数・正答数・正答率）の保存とリセット</li>
-          <li>未レビューの問題には「確認中」と表示</li>
-        </ul>
-        <button type="button" class="btn btn-primary" data-nav="demo">牌操作デモで遊ぶ</button>
+        <p class="page-lead">「最有力」「有力」を選ぶと正答として数えます。すべての問題は推奨打牌と解説が<strong>未レビュー</strong>のため「確認中」と表示しています（シャンテン数・受入枚数は計算で検証済み）。</p>
+        <div class="seg" id="nk-filter" role="group" aria-label="難易度で絞り込み">
+          <button type="button" class="seg-btn" data-filter="all" aria-pressed="true">すべて</button>
+          <button type="button" class="seg-btn" data-filter="easy" aria-pressed="false">初級</button>
+          <button type="button" class="seg-btn" data-filter="normal" aria-pressed="false">中級</button>
+          <button type="button" class="seg-btn" data-filter="hard" aria-pressed="false">上級</button>
+        </div>
+        <ul class="nk-list" id="nk-list"></ul>
+        <p id="nk-list-empty" class="muted" hidden>該当する問題はありません。</p>
       </div>
     </section>
 
-    <!-- 7〜9. CPU四人麻雀（フェーズ3〜6で実装） -->
-    <section class="screen screen-page" data-screen="cpu" hidden>
-      <header class="page-header">
-        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
-        <h2 tabindex="-1">CPU四人麻雀</h2>
-        <span class="header-spacer"></span>
+    <!-- 6. 何切る問題プレイ画面 -->
+    <section class="screen play-screen nk-screen" id="screen-nk" data-screen="nanikiru-play" hidden>
+      <header class="play-header nk-head">
+        <button type="button" class="btn-icon" data-nav="nanikiru" aria-label="問題一覧へ戻る">‹</button>
+        <h2 class="play-title" id="nk-title" tabindex="-1">何を切る？</h2>
+        <button type="button" class="btn-icon" data-open-menu aria-label="メニューを開く">≡</button>
       </header>
-      <div class="page-body">
-        <div class="notice notice-planned">
-          <strong>このモードは未実装です（フェーズ3〜6で実装予定）</strong>
-          <p>現在の版では対局できません。実装予定の内容は以下のとおりです。</p>
-        </div>
-        <ul class="plan-list">
-          <li>フェーズ3：4人への配牌、ツモ・打牌の進行、CPU打牌、流局</li>
-          <li>フェーズ4：ロン・ツモ判定、主要役の判定、符・翻・点数計算</li>
-          <li>フェーズ5：ポン・チー・カン・リーチ、演出、CPUレベル1〜3</li>
-          <li>フェーズ6：東風戦の完走、連荘・本場・供託・順位、戦績保存</li>
-        </ul>
-        <button type="button" class="btn btn-primary" data-nav="demo">牌操作デモで遊ぶ</button>
+
+      <div class="nk-main" id="nk-main">
+        <div class="nk-chips" id="nk-chips"></div>
+        <p class="nk-situation" id="nk-situation" hidden></p>
+        <div class="nk-visible" id="nk-visible" hidden></div>
+        <p class="nk-prompt">あなたの手番です。14枚から1枚を選んで切ってください。</p>
       </div>
+
+      <div class="hand-zone nk-hand-zone" id="nk-hand-zone">
+        <p class="status-line" id="nk-status"></p>
+        <div class="hand" id="nk-hand" role="group" aria-label="手牌（左右キーで移動、Enterで選択・回答）"></div>
+      </div>
+
+      <div class="nk-act">
+        <button type="button" class="btn act act-discard nk-answer" id="nk-btn-answer"><span class="act-icon" aria-hidden="true">↑</span><span>この牌を切る<span class="btn-sub">未選択</span></span></button>
+        <section class="nk-sheet" id="nk-sheet" aria-label="回答結果と解説"></section>
+      </div>
+
+      <nav class="nk-nav" aria-label="問題の移動">
+        <button type="button" class="btn act" id="nk-btn-prev"><span class="act-icon" aria-hidden="true">‹</span>前の問題</button>
+        <button type="button" class="btn act" data-nav="nanikiru"><span class="act-icon" aria-hidden="true">≣</span>問題一覧</button>
+        <button type="button" class="btn act" id="nk-btn-next"><span class="act-icon" aria-hidden="true">›</span>次の問題</button>
+      </nav>
+    </section>
+
+    <!-- 7〜9. CPU四人麻雀：対局設定・対局画面・局結果・最終結果（結果はオーバーレイ） -->
+    <section class="screen play-screen mt-screen" id="screen-mt" data-screen="cpu" data-view="setup" hidden>
+      <header class="play-header mt-head">
+        <button type="button" class="btn-icon" data-nav="modes" aria-label="モード選択へ戻る">‹</button>
+        <h2 class="play-title" tabindex="-1">CPU四人麻雀</h2>
+        <button type="button" class="btn-icon" data-open-menu aria-label="メニューを開く">≡</button>
+      </header>
+
+      <!-- 対局設定 -->
+      <div class="mt-setup" id="mt-setup">
+        <div class="page-body">
+          <div class="notice notice-planned">
+            <strong>試作版（フェーズ3：基本進行）</strong>
+            <p>配牌・ツモ・打牌・CPUの打牌・山切れの流局（テンパイ判定・ノーテン罰符・連荘・本場）・東風戦の終了と順位まで遊べます。<br>
+            <b>ロン・ツモ和了、ポン・チー・カン、リーチ、九種九牌は未実装</b>（フェーズ4・5）のため、すべての局が流局で終わります。戦績の保存はフェーズ6で対応します。</p>
+          </div>
+
+          <h3 class="mt-setup-h">対戦相手</h3>
+          <ul class="mt-opponents">
+            <li class="theme-jade"><span class="mt-opp-dot"></span><b>ヒスイ</b><span>下家（右）</span></li>
+            <li class="theme-violet"><span class="mt-opp-dot"></span><b>シオン</b><span>対面（上）</span></li>
+            <li class="theme-rose"><span class="mt-opp-dot"></span><b>アカネ</b><span>上家（左）</span></li>
+          </ul>
+
+          <h3 class="mt-setup-h">CPUの強さ</h3>
+          <div class="seg" id="mt-level" role="group" aria-label="CPUレベル">
+            <button type="button" class="seg-btn" data-level="1" aria-pressed="true">レベル1</button>
+            <button type="button" class="seg-btn" data-level="2" aria-pressed="false" aria-disabled="true">レベル2（未実装）</button>
+            <button type="button" class="seg-btn" data-level="3" aria-pressed="false" aria-disabled="true">レベル3（未実装）</button>
+          </div>
+          <p class="muted mt-setup-note">レベル1：シャンテン数を悪化させない牌のうち、孤立牌・役のない字牌・端牌から切ります。鳴きはしません。</p>
+
+          <h3 class="mt-setup-h">ルール</h3>
+          <dl class="mt-rules">
+            <div><dt>対局</dt><dd>東風戦（東1局〜東4局、親がテンパイなら連荘）</dd></div>
+            <div><dt>持ち点</dt><dd>25,000点（0点未満で終了）</dd></div>
+            <div><dt>赤ドラ</dt><dd>5萬・5筒・5索 各1枚</dd></div>
+            <div><dt>流局</dt><dd>ノーテン罰符 3,000点、本場を1つ積む</dd></div>
+            <div><dt>喰いタン</dt><dd>あり（鳴き・役判定の実装後に有効）</dd></div>
+          </dl>
+
+          <button type="button" class="btn btn-primary btn-xl mt-start" id="mt-btn-start">対局開始</button>
+        </div>
+      </div>
+
+      <!-- 卓 -->
+      <div class="mt-board" id="mt-board">
+        <div class="mt-hint" id="mt-landscape-hint" hidden>
+          <span>横向きがおすすめです（縦でも遊べます）</span>
+          <button type="button" class="chip-btn" id="mt-hint-close">閉じる</button>
+        </div>
+        <div class="mt-seat" data-seat="2"></div>
+        <div class="mt-seat" data-seat="3"></div>
+        <div class="mt-seat" data-seat="1"></div>
+        <div class="mt-pond-wrap" id="mt-pond-wrap">
+          <div class="mt-pond" id="mt-pond">
+            <div class="mt-river-layer" data-seat="0"><div class="mt-river" id="mt-river-0" role="list" aria-label="あなたの河"></div></div>
+            <div class="mt-river-layer" data-seat="1"><div class="mt-river" id="mt-river-1" role="list" aria-label="ヒスイの河"></div></div>
+            <div class="mt-river-layer" data-seat="2"><div class="mt-river" id="mt-river-2" role="list" aria-label="シオンの河"></div></div>
+            <div class="mt-river-layer" data-seat="3"><div class="mt-river" id="mt-river-3" role="list" aria-label="アカネの河"></div></div>
+            <div class="mt-info" id="mt-info">
+              <div class="mt-edge-layer" data-seat="0"><span class="mt-edge" data-seat="0"></span></div>
+              <div class="mt-edge-layer" data-seat="1"><span class="mt-edge" data-seat="1"></span></div>
+              <div class="mt-edge-layer" data-seat="2"><span class="mt-edge" data-seat="2"></span></div>
+              <div class="mt-edge-layer" data-seat="3"><span class="mt-edge" data-seat="3"></span></div>
+              <div class="mt-info-core">
+                <b class="mt-round" id="mt-round">東1局</b>
+                <span class="mt-sub"><span id="mt-honba">0本場</span>・供託<b id="mt-sticks">0</b></span>
+                <span class="mt-dora" id="mt-dora" aria-label="ドラ表示牌"></span>
+                <span class="mt-sub">残り<b id="mt-remaining">70</b></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hand-zone mt-hand-zone" id="mt-hand-zone">
+        <div class="mt-me">
+          <div class="mt-seat" data-seat="0"></div>
+          <p class="status-line" id="mt-status"></p>
+        </div>
+        <div class="hand" id="mt-hand" role="group" aria-label="あなたの手牌（左右キーで移動、Enterで選択・打牌）"></div>
+      </div>
+
+      <nav class="action-bar mt-actions" aria-label="対局の操作">
+        <button type="button" class="btn act act-discard" id="mt-btn-discard"><span class="act-icon" aria-hidden="true">↑</span><span>この牌を切る<span class="btn-sub">未選択</span></span></button>
+        <button type="button" class="btn act" id="mt-btn-sort"><span class="act-icon" aria-hidden="true">⇅</span>整列</button>
+        <button type="button" class="btn act" id="mt-btn-auto" aria-pressed="false"><span class="act-icon" aria-hidden="true">⟳</span><span>オート<span class="btn-sub">オフ</span></span></button>
+        <p class="mt-actions-note">ロン・ツモ・リーチ・鳴きはフェーズ4・5で追加</p>
+      </nav>
+
+      <div class="mt-overlay" id="mt-overlay" role="dialog" aria-modal="true" aria-labelledby="mt-ov-title" hidden></div>
     </section>
 
     <!-- 3. ルール設定画面 -->
@@ -269,6 +377,25 @@
             <tr><th scope="row">I</th><td>牌の情報を表示</td></tr>
           </tbody>
         </table>
+        <h3>何切る問題</h3>
+        <ol>
+          <li>問題一覧から問題を選びます。難易度で絞り込めます。</li>
+          <li>切る牌をタップして選び、「この牌を切る」で回答します（打牌方法の設定により、再タップや上スワイプでも回答できます）。</li>
+          <li>画面下に結果が出ます。「解説を詳しく見る」で、受入牌・推奨候補・狙える役・解説・全打牌の比較を表示します。</li>
+          <li>回答後に手牌の別の牌を押すと、その牌を切った場合と比較できます。</li>
+        </ol>
+        <p>評価は「◎最有力」「○有力」「△目的によって選択可能」「✕改善余地あり」の4段階です。◎と○を正答として数えます。キーボードでは D で回答、N／P で次／前の問題へ移動します。</p>
+        <p>シャンテン数と受入枚数は、手牌14枚・ドラ表示牌・問題文で「見えている牌」を除いた残り枚数で計算します。</p>
+        <h3>CPU四人麻雀（試作版）</h3>
+        <ol>
+          <li>「対局開始」を押すとサイコロで起家（最初の親）が決まり、「配牌する」で始まります。</li>
+          <li>あなたの番になると自動でツモし、手牌が光ります。切る牌を選んで打牌します（操作は牌操作デモと同じです）。</li>
+          <li>CPUは順番に自動で打牌します。考え中のCPUはパネルに「考え中」と表示されます。</li>
+          <li>山がなくなると流局です。テンパイ・ノーテンと点数の移動が表示され、「次の局へ」で進みます。</li>
+          <li>東4局が終わると最終順位を表示します。</li>
+        </ol>
+        <p>「オート」をオンにすると、あなたの手番もCPU（レベル1）が打牌します。キーボードでは D で打牌、S で整列、A でオートの切り替えです。対局の終了はメニュー（≡）の「対局を終了」から行えます。</p>
+        <p>この版では、ロン・ツモ和了、ポン・チー・カン、リーチ、九種九牌はまだできません（すべての局が流局で終わります）。</p>
         <h3>テスト用の牌山</h3>
         <p>「手牌読込」で、手牌（13枚または14枚）、ツモ順、シードを指定できます。表記は <code>123m456p789s1122z</code> 形式です（m=萬子、p=筒子、s=索子、z=字牌 1〜7が東南西北白發中、0=赤5）。</p>
       </div>
@@ -306,6 +433,7 @@
         <button type="button" class="btn btn-ghost" data-nav="howto">遊び方</button>
         <button type="button" class="btn btn-ghost" data-nav="settings">すべての設定</button>
         <button type="button" class="btn btn-ghost" data-nav="modes">モード選択へ</button>
+        <button type="button" class="btn btn-ghost btn-danger-ghost" id="menu-quit-match" hidden>対局を終了</button>
       </div>
       <div class="dlg-actions">
         <button type="submit" class="btn btn-primary" value="close">閉じる</button>
@@ -371,17 +499,26 @@
   <script src="js/constants.js"></script>
   <script src="data/rules.js"></script>
   <script src="data/changelog.js"></script>
+  <script src="data/questions.js"></script>
   <script src="js/tiles.js"></script>
   <script src="js/wall.js"></script>
   <script src="js/hand-sorter.js"></script>
+  <script src="js/shanten.js"></script>
+  <script src="js/ukeire.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/animation.js"></script>
   <script src="js/tile-art.js"></script>
   <script src="js/renderer.js"></script>
+  <script src="js/hand-input.js"></script>
   <script src="js/debug.js"></script>
   <script src="js/modes/demo-model.js"></script>
   <script src="js/modes/demo.js"></script>
+  <script src="js/modes/nanikiru-model.js"></script>
+  <script src="js/modes/nanikiru.js"></script>
+  <script src="js/game-engine.js"></script>
+  <script src="js/cpu-player.js"></script>
+  <script src="js/modes/match.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
