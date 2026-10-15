@@ -13,10 +13,12 @@
     <tbody>
       <tr><td><a href="tiles-tests.html">tiles-tests.html</a></td><td>牌生成・表記・ドラ・整列・牌山・デモ進行・保存データ</td><td class="pass">実装済み</td></tr>
       <tr><td><a href="shanten-tests.html">shanten-tests.html</a></td><td>シャンテン数（通常形・七対子・国士無双・副露）・受入・何切る問題データ検証・判定・成績</td><td class="pass">実装済み</td></tr>
-      <tr><td><a href="match-tests.html">match-tests.html</a></td><td>対局進行（配牌・手番順・ツモ打牌・流局・ノーテン罰符・連荘・東風戦終了・順位）・CPUレベル1の打牌</td><td class="pass">実装済み</td></tr>
-      <tr><td>agari-tests.html</td><td>通常形・七対子・国士無双・鳴きあり</td><td>フェーズ4で追加</td></tr>
-      <tr><td>yaku-tests.html</td><td>主要役・食い下がり・複合・役なし・役満</td><td>フェーズ4で追加</td></tr>
-      <tr><td>scoring-tests.html</td><td>符・翻・親子・ロン／ツモ・本場・供託・切り上げ</td><td>フェーズ4で追加</td></tr>
+      <tr><td><a href="match-tests.html">match-tests.html</a></td><td>対局進行（配牌・手番順・ツモ打牌・ツモ和了・ロン・頭ハネ・フリテン・流局・ノーテン罰符・連荘・本場・東風戦終了・順位）・CPUレベル1の打牌</td><td class="pass">実装済み</td></tr>
+      <tr><td><a href="calls-tests.html">calls-tests.html</a></td><td>ポン・チー（喰い替え禁止）・明槓・暗槓・加槓・槍槓・嶺上開花・応答の優先順位・河底は鳴けない・リーチ（宣言牌・供託・一発・裏ドラ・ツモ切り・リーチ後フリテン・条件）・九種九牌・供託の精算・CPUレベル2・3（リーチ・鳴き・危険度・押し引き）・鳴きリーチありの東風戦完走</td><td class="pass">実装済み</td></tr>
+      <tr><td><a href="stats-tests.html">stats-tests.html</a></td><td>戦績（局・対局の記録、平均順位・各率、最高の和了、履歴10件、レベル別、リセット）・保存データの移行・操作の制限時間（残り時間・引き継ぎ・リセット・一時停止）</td><td class="pass">実装済み</td></tr>
+      <tr><td><a href="agari-tests.html">agari-tests.html</a></td><td>通常形・七対子・国士無双・副露、分解、待ちの形（両面・嵌張・辺張・双碰・単騎・13面）、待ち牌</td><td class="pass">実装済み</td></tr>
+      <tr><td><a href="yaku-tests.html">yaku-tests.html</a></td><td>実装済みの全役・役満・門前と副露の翻数差・食い下がり・喰いタン・複合・役なし</td><td class="pass">実装済み</td></tr>
+      <tr><td><a href="scoring-tests.html">scoring-tests.html</a></td><td>点数早見表（親子・ロンツモ・満貫以上・役満）、符計算、ドラ・赤・裏、本場・供託・点数移動、表示</td><td class="pass">実装済み</td></tr>
     </tbody>
   </table>
   <p>Node.js がある環境では <code>node tests/run-node.js</code> でも同じテストを実行できます。</p>

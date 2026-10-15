@@ -20,14 +20,25 @@ const files = [
   'js/ukeire.js',
   'js/modes/demo-model.js',
   'js/modes/nanikiru-model.js',
+  'js/agari.js',
+  'js/yaku.js',
+  'js/scoring.js',
   'js/game-engine.js',
   'js/cpu-player.js',
+  'js/match-stats.js',
+  'js/turn-timer.js',
   'tests/test-runner.js',
+  'tests/specs/helpers.js',
   'tests/specs/tiles.spec.js',
   'tests/specs/demo-model.spec.js',
   'tests/specs/shanten.spec.js',
   'tests/specs/questions.spec.js',
-  'tests/specs/match.spec.js'
+  'tests/specs/match.spec.js',
+  'tests/specs/agari.spec.js',
+  'tests/specs/yaku.spec.js',
+  'tests/specs/scoring.spec.js',
+  'tests/specs/calls.spec.js',
+  'tests/specs/stats.spec.js'
 ];
 
 const sandbox = { console: console, crypto: globalThis.crypto };

@@ -26,6 +26,9 @@
 - 手牌のタップ・スワイプ・長押し・キーボード操作は `js/hand-input.js`（`MJ.handInput`）を使う。モードごとに入力処理を書かない
 - シャンテン数・受入は `js/shanten.js`・`js/ukeire.js` を使う。問題データやCPUの中で別の計算をしない
 - CPU四人麻雀の状態は `js/game-engine.js` の関数だけで変更する。画面側（`js/modes/match.js`）は状態を読んで描画し、進行のタイミングを決めるだけにする
+- 和了の判定・役・点数は `js/agari.js`・`js/yaku.js`・`js/scoring.js` だけで計算する。役を追加・変更したら `tests/specs/yaku.spec.js` と `tests/specs/scoring.spec.js` に点数早見表と照合するテストを足す
+- 鳴き・リーチ・カンは `MJ.gameEngine` の `respondCall`・`discard({ riichi })`・`declareAnkan`・`declareKakan` だけで行う。応答待ち（`phase === 'call'`）は `pendingActions` の先頭から1人ずつ処理する
+- 戦績は `js/match-stats.js` で記録・集計する。保存データの形を変えたら `MJ.storage.DEFAULT_STATS` を更新し、以前の形式から読み込めることをテストで確認する（`tests/specs/stats.spec.js`）
 - CPUの判断は `js/cpu-player.js` に置き、判断理由と評価値を必ず返す（デバッグパネルで確認できるようにするため）
 
 ### UI

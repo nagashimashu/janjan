@@ -9,7 +9,7 @@
   const $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   const ROUTES = ['title', 'modes', 'demo', 'nanikiru', 'nanikiru-play', 'cpu', 'rules', 'settings', 'stats', 'howto', 'about'];
-  const MENU_KEYS = ['volume', 'sound', 'vibration', 'animSpeed', 'discardMethod', 'misdiscardGuard'];
+  const MENU_KEYS = ['volume', 'sound', 'vibration', 'animSpeed', 'discardMethod', 'misdiscardGuard', 'turnTimer'];
 
   MJ.settings = MJ.storage.loadSettings();
   MJ.stats = MJ.storage.loadStats();
@@ -162,8 +162,98 @@
       '<div><dt>挑戦数</dt><dd>' + s.nanikiru.attempts + '</dd></div>' +
       '<div><dt>正答数（最有力・有力）</dt><dd>' + s.nanikiru.correct + '</dd></div>' +
       '<div><dt>正答率</dt><dd>' + (s.nanikiru.attempts ? MJ.nanikiruModel.accuracy(s.nanikiru) + '%' : '—') + '</dd></div>' +
-      '<div><dt>挑戦した問題</dt><dd>' + Object.keys(s.nanikiru.byQuestion).length + ' / ' + MJ.QUESTIONS.length + '</dd></div></dl></div>' +
-      '<div class="stat-card is-planned"><h3>CPU四人麻雀</h3><p><span class="badge badge-planned">未実装</span> フェーズ6で対局数・順位分布を記録します。</p></div>';
+      '<div><dt>挑戦した問題</dt><dd>' + Object.keys(s.nanikiru.byQuestion).length + ' / ' + MJ.QUESTIONS.length + '</dd></div></dl></div>';
+    body.appendChild(matchStatsCard(s.match));
+  }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function statRow(dl, label, value) {
+    const d = el('div');
+    d.append(el('dt', null, label), el('dd', null, value));
+    dl.append(d);
+  }
+
+  /* CPU四人麻雀の戦績カード（保存データ由来の文字列は textContent で入れる） */
+  function matchStatsCard(m) {
+    const card = el('div', 'stat-card stat-card-wide');
+    card.append(el('h3', null, 'CPU四人麻雀'));
+    const sum = MJ.matchStats.summary(m);
+    if (!sum.games) {
+      card.append(el('p', 'muted', 'まだ記録がありません。東風戦を最後まで打つと記録されます（途中で終了した対局は記録しません）。'));
+      return card;
+    }
+    const dl = el('dl');
+    statRow(dl, '対局数', sum.games + '戦（' + sum.rounds + '局）');
+    statRow(dl, '平均順位', sum.avgRank.toFixed(2));
+    statRow(dl, '1位率／4位率', sum.topRate + '%／' + sum.lastRate + '%');
+    statRow(dl, '平均の最終点数', sum.avgScore.toLocaleString('ja-JP') + '点');
+    statRow(dl, '和了率（うちツモ）', sum.winRate + '%（' + sum.tsumoShare + '%）');
+    statRow(dl, '放銃率', sum.dealInRate + '%');
+    statRow(dl, 'リーチ率／副露率', sum.riichiRate + '%／' + sum.callRate + '%');
+    card.append(dl);
+
+    /* 順位分布：棒の長さ＋回数と割合の文字（色だけに頼らない） */
+    card.append(el('h4', null, '順位分布'));
+    const bars = el('div', 'rank-bars');
+    m.placements.forEach(function (n, i) {
+      const row = el('div', 'rank-bar rank-bar-' + (i + 1));
+      const pctv = sum.games ? Math.round((n / sum.games) * 100) : 0;
+      const bar = el('span', 'rank-bar-fill');
+      bar.style.width = pctv + '%';
+      const track = el('span', 'rank-bar-track');
+      track.append(bar);
+      row.append(el('span', 'rank-bar-label', (i + 1) + '位'), track, el('span', 'rank-bar-num', n + '回（' + pctv + '%）'));
+      bars.append(row);
+    });
+    card.append(bars);
+
+    card.append(el('h4', null, 'CPUレベル別'));
+    const lv = el('dl');
+    ['1', '2', '3'].forEach(function (k) {
+      const b = m.byLevel[k];
+      if (!b || !b.games) return;
+      const avg = b.placements.reduce(function (a, n, i) { return a + n * (i + 1); }, 0) / b.games;
+      statRow(lv, 'レベル' + k, b.games + '戦・平均順位 ' + avg.toFixed(2) + '・1位 ' + b.placements[0] + '回');
+    });
+    card.append(lv);
+
+    if (m.bestHand && m.bestHand.points) {
+      card.append(el('h4', null, '最高の和了'));
+      const best = el('p', 'best-hand');
+      best.append(el('strong', null, m.bestHand.head + ' ' + (m.bestHand.pointsText || m.bestHand.points + '点')));
+      best.append(el('span', null, '　' + (m.bestHand.yaku || []).join('・') + '（' + (m.bestHand.round || '') + '・' + (m.bestHand.date || '') + '）'));
+      card.append(best);
+    }
+
+    if (m.history.length) {
+      card.append(el('h4', null, '直近の対局（新しい順）'));
+      const ol = el('ol', 'match-history');
+      m.history.forEach(function (x) {
+        ol.append(el('li', 'rank-' + x.rank, x.date + '　' + x.rank + '位　' + Number(x.score).toLocaleString('ja-JP') + '点　レベル' + x.level + '・' + x.rounds + '局'));
+      });
+      card.append(ol);
+    }
+
+    const reset = el('button', 'btn btn-ghost btn-danger-ghost btn-sm', 'CPU四人麻雀の戦績をリセット');
+    reset.type = 'button';
+    reset.dataset.resetMatch = '1';
+    card.append(reset);
+    return card;
+  }
+
+  async function resetMatchStats() {
+    const ok = await MJ.ui.confirm('CPU四人麻雀の戦績（対局数・順位・和了率・履歴など）をリセットします。元に戻せません。よろしいですか？', { title: '戦績のリセット', ok: 'リセットする', danger: true });
+    if (!ok) return;
+    MJ.matchStats.reset(MJ.stats);
+    MJ.saveStats();
+    renderStats();
+    MJ.ui.toast('CPU四人麻雀の戦績をリセットしました');
   }
 
   function renderRules() {
@@ -300,6 +390,7 @@
         MJ.match.quit();
       }
       if (e.target.closest('[data-reset-data]')) resetData();
+      if (e.target.closest('[data-reset-match]')) resetMatchStats();
     });
 
     /* 最初のユーザー操作で AudioContext を有効化する */

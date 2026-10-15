@@ -138,6 +138,23 @@
 .stat-card dl div { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
 .stat-card dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
 .stat-card.is-planned p { color: var(--muted); margin: 0; }
+.stat-card-wide { grid-column: 1 / -1; }
+.stat-card h4 { margin: 16px 0 6px; font-size: .92rem; color: var(--jade); }
+.stat-card .btn { margin-top: 14px; }
+.rank-bars { display: grid; gap: 6px; }
+.rank-bar { display: grid; grid-template-columns: 2.6em minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: .88rem; }
+.rank-bar-track { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.rank-bar-fill { display: block; height: 100%; border-radius: 6px; background: var(--muted); }
+.rank-bar-1 .rank-bar-fill { background: var(--gold); }
+.rank-bar-2 .rank-bar-fill { background: var(--jade); }
+.rank-bar-3 .rank-bar-fill { background: var(--violet); }
+.rank-bar-4 .rank-bar-fill { background: var(--rose); }
+.rank-bar-num { font-variant-numeric: tabular-nums; color: var(--muted); }
+.best-hand { margin: 0; }
+.best-hand strong { color: var(--gold); }
+.match-history { margin: 0; padding-left: 1.4em; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.match-history li { padding: 2px 0; }
+.match-history li.rank-1 { color: var(--gold); }
 
 .log-entry h3 { border: 0; padding: 0; margin-top: 1em; font-size: 1rem; color: var(--jade); }
 

@@ -45,7 +45,7 @@
         <p class="title-sub">SEISUI MAHJONG</p>
         <p class="title-lead">ブラウザーだけで遊べる、ひとり用の麻雀</p>
         <button type="button" class="btn btn-primary btn-xl" data-nav="modes">はじめる</button>
-        <p class="title-version"><span id="app-version"></span> ・ 試作版</p>
+        <p class="title-version"><span id="app-version"></span></p>
       </div>
     </section>
 
@@ -82,8 +82,8 @@
 
         <article class="mode-card theme-gold">
           <div class="mode-art" aria-hidden="true" data-backs="3"></div>
-          <h3>CPU四人麻雀 <span class="badge badge-planned">試作</span></h3>
-          <p>CPU3人と東風戦で対局します。現在は基本進行（ツモ・打牌・流局）まで。和了・鳴き・リーチは未実装です。</p>
+          <h3>CPU四人麻雀</h3>
+          <p>CPU3人と東風戦で対局します。リーチ・鳴き・カン・役・点数計算まで実装済み。CPUはレベル1〜3。</p>
           <dl class="mode-meta">
             <div><dt>難易度</dt><dd>中級</dd></div>
             <div><dt>推奨端末</dt><dd>PC・タブレット・スマホ横</dd></div>
@@ -222,9 +222,9 @@
       <div class="mt-setup" id="mt-setup">
         <div class="page-body">
           <div class="notice notice-planned">
-            <strong>試作版（フェーズ3：基本進行）</strong>
-            <p>配牌・ツモ・打牌・CPUの打牌・山切れの流局（テンパイ判定・ノーテン罰符・連荘・本場）・東風戦の終了と順位まで遊べます。<br>
-            <b>ロン・ツモ和了、ポン・チー・カン、リーチ、九種九牌は未実装</b>（フェーズ4・5）のため、すべての局が流局で終わります。戦績の保存はフェーズ6で対応します。</p>
+            <strong>東風戦・CPU3人</strong>
+            <p>配牌・ツモ・打牌・<b>ポン・チー・カン（明槓・暗槓・加槓）・リーチ</b>・ツモ和了・ロン（役判定・符・翻・点数・本場・供託・頭ハネ・フリテン・槍槓・嶺上開花）・九種九牌・山切れの流局・東風戦の終了と順位まで遊べます。<br>
+            東風戦を最後まで打つと戦績を保存します（途中で終了した対局は保存しません）。簡略化しているルールは「遊び方」と README に記載しています。</p>
           </div>
 
           <h3 class="mt-setup-h">対戦相手</h3>
@@ -236,19 +236,26 @@
 
           <h3 class="mt-setup-h">CPUの強さ</h3>
           <div class="seg" id="mt-level" role="group" aria-label="CPUレベル">
-            <button type="button" class="seg-btn" data-level="1" aria-pressed="true">レベル1</button>
-            <button type="button" class="seg-btn" data-level="2" aria-pressed="false" aria-disabled="true">レベル2（未実装）</button>
-            <button type="button" class="seg-btn" data-level="3" aria-pressed="false" aria-disabled="true">レベル3（未実装）</button>
+            <button type="button" class="seg-btn" data-level="1" aria-pressed="false">レベル1</button>
+            <button type="button" class="seg-btn" data-level="2" aria-pressed="true">レベル2</button>
+            <button type="button" class="seg-btn" data-level="3" aria-pressed="false">レベル3</button>
           </div>
-          <p class="muted mt-setup-note">レベル1：シャンテン数を悪化させない牌のうち、孤立牌・役のない字牌・端牌から切ります。鳴きはしません。</p>
+          <p class="muted mt-setup-note mt-level-note" data-level="1" hidden>レベル1（入門）：シャンテン数を悪化させない牌のうち、孤立牌・役のない字牌・端牌から切ります。リーチ・鳴きはしません。</p>
+          <p class="muted mt-setup-note mt-level-note" data-level="2">レベル2（標準）：受入枚数・ドラ・役牌を考えて打ち、テンパイしたらリーチします。役が確定するときだけ鳴きます。</p>
+          <p class="muted mt-setup-note mt-level-note" data-level="3" hidden>レベル3（上級）：レベル2に加えて、リーチを受けたら押し引きを判断し、現物・筋・壁・字牌で安全な牌を選びます。オーラスは順位を考えます。</p>
 
           <h3 class="mt-setup-h">ルール</h3>
           <dl class="mt-rules">
-            <div><dt>対局</dt><dd>東風戦（東1局〜東4局、親がテンパイなら連荘）</dd></div>
+            <div><dt>対局</dt><dd>東風戦（東1局〜東4局、親の和了・テンパイで連荘）</dd></div>
             <div><dt>持ち点</dt><dd>25,000点（0点未満で終了）</dd></div>
             <div><dt>赤ドラ</dt><dd>5萬・5筒・5索 各1枚</dd></div>
+            <div><dt>和了</dt><dd>ダブロンなし（頭ハネ）、フリテンあり、切り上げ満貫なし、数え役満あり</dd></div>
+            <div><dt>本場</dt><dd>1本につきロン300点・ツモ1人100点。子の和了で0に戻る</dd></div>
             <div><dt>流局</dt><dd>ノーテン罰符 3,000点、本場を1つ積む</dd></div>
-            <div><dt>喰いタン</dt><dd>あり（鳴き・役判定の実装後に有効）</dd></div>
+            <div><dt>喰いタン</dt><dd>あり（喰い替えは禁止）</dd></div>
+            <div><dt>リーチ</dt><dd>1,000点・残り4枚以上。一発・裏ドラあり。供託はトップが総取り（対局終了時に残った分）</dd></div>
+            <div><dt>カン</dt><dd>カンドラはカンの直後にめくる。四槓散了なし（カンは1局4回まで）</dd></div>
+            <div><dt>途中流局</dt><dd>九種九牌のみ（親は連荘）</dd></div>
           </dl>
 
           <button type="button" class="btn btn-primary btn-xl mt-start" id="mt-btn-start">対局開始</button>
@@ -290,17 +297,40 @@
         <div class="mt-me">
           <div class="mt-seat" data-seat="0"></div>
           <p class="status-line" id="mt-status"></p>
+          <div class="mt-timer" id="mt-timer" role="timer" aria-label="残り時間" hidden>
+            <span class="mt-timer-gauge" aria-hidden="true"><i></i></span>
+            <b class="mt-timer-num" aria-hidden="true"></b><span class="mt-timer-unit" aria-hidden="true">秒</span>
+          </div>
         </div>
-        <div class="hand" id="mt-hand" role="group" aria-label="あなたの手牌（左右キーで移動、Enterで選択・打牌）"></div>
+        <div class="mt-hand-row">
+          <div class="hand" id="mt-hand" role="group" aria-label="あなたの手牌（左右キーで移動、Enterで選択・打牌）"></div>
+          <div class="mt-melds mt-my-melds" id="mt-my-melds" aria-label="あなたの鳴き牌" hidden></div>
+        </div>
       </div>
 
       <nav class="action-bar mt-actions" aria-label="対局の操作">
-        <button type="button" class="btn act act-discard" id="mt-btn-discard"><span class="act-icon" aria-hidden="true">↑</span><span>この牌を切る<span class="btn-sub">未選択</span></span></button>
+        <div class="mt-callbar" id="mt-callbar" role="group" aria-label="和了・鳴き・リーチの選択" hidden>
+          <p class="mt-call-info" id="mt-call-info"></p>
+          <button type="button" class="btn act act-win act-tsumo" id="mt-btn-tsumo" hidden><span class="act-icon" aria-hidden="true">★</span>ツモ</button>
+          <button type="button" class="btn act act-win act-ron" id="mt-btn-ron" hidden><span class="act-icon" aria-hidden="true">◆</span>ロン</button>
+          <button type="button" class="btn act act-riichi" id="mt-btn-riichi" hidden><span class="act-icon" aria-hidden="true">┃</span>リーチ</button>
+          <button type="button" class="btn act act-pon" id="mt-btn-pon" hidden><span class="act-icon" aria-hidden="true">▲</span>ポン</button>
+          <button type="button" class="btn act act-chi" id="mt-btn-chi" hidden><span class="act-icon" aria-hidden="true">≡</span>チー</button>
+          <button type="button" class="btn act act-kan" id="mt-btn-kan" hidden><span class="act-icon" aria-hidden="true">■</span>カン</button>
+          <button type="button" class="btn act act-kyuushu" id="mt-btn-kyuushu" hidden><span class="act-icon" aria-hidden="true">九</span>九種九牌</button>
+          <button type="button" class="btn act act-skip" id="mt-btn-skip" hidden><span class="act-icon" aria-hidden="true">→</span>スキップ</button>
+          <button type="button" class="btn act act-skip" id="mt-btn-cancel" hidden><span class="act-icon" aria-hidden="true">×</span>リーチ取消</button>
+        </div>
+        <button type="button" class="btn act act-discard" id="mt-btn-discard"><span class="act-icon" aria-hidden="true">↑</span><span><span class="btn-label">この牌を切る</span><span class="btn-sub">未選択</span></span></button>
         <button type="button" class="btn act" id="mt-btn-sort"><span class="act-icon" aria-hidden="true">⇅</span>整列</button>
         <button type="button" class="btn act" id="mt-btn-auto" aria-pressed="false"><span class="act-icon" aria-hidden="true">⟳</span><span>オート<span class="btn-sub">オフ</span></span></button>
-        <p class="mt-actions-note">ロン・ツモ・リーチ・鳴きはフェーズ4・5で追加</p>
+        <p class="mt-actions-note">キー：R リーチ／ロン・P ポン・C チー・K カン・N スキップ・T ツモ</p>
       </nav>
 
+      <div class="mt-callout" id="mt-callout" aria-hidden="true" hidden>
+        <span class="mt-callout-word"></span>
+        <span class="mt-callout-name"></span>
+      </div>
       <div class="mt-overlay" id="mt-overlay" role="dialog" aria-modal="true" aria-labelledby="mt-ov-title" hidden></div>
     </section>
 
@@ -312,7 +342,7 @@
         <span class="header-spacer"></span>
       </header>
       <div class="page-body">
-        <p class="page-lead">試作版の標準ルールです。「未実装」のルールは値だけを保持しており、対応するモードの実装後に反映されます。ルールの変更機能はCPU四人麻雀の実装時に追加します。</p>
+        <p class="page-lead">採用しているルールの一覧です。「反映中」はゲームに反映されています。ルールを変更する画面はありません（値は data/rules.js で管理しています）。操作の制限時間は「設定」で選べます。</p>
         <div class="table-scroll">
           <table class="data-table">
             <thead><tr><th scope="col">項目</th><th scope="col">設定値</th><th scope="col">状態</th><th scope="col">備考</th></tr></thead>
@@ -386,16 +416,24 @@
         </ol>
         <p>評価は「◎最有力」「○有力」「△目的によって選択可能」「✕改善余地あり」の4段階です。◎と○を正答として数えます。キーボードでは D で回答、N／P で次／前の問題へ移動します。</p>
         <p>シャンテン数と受入枚数は、手牌14枚・ドラ表示牌・問題文で「見えている牌」を除いた残り枚数で計算します。</p>
-        <h3>CPU四人麻雀（試作版）</h3>
+        <h3>CPU四人麻雀</h3>
         <ol>
           <li>「対局開始」を押すとサイコロで起家（最初の親）が決まり、「配牌する」で始まります。</li>
           <li>あなたの番になると自動でツモし、手牌が光ります。切る牌を選んで打牌します（操作は牌操作デモと同じです）。</li>
           <li>CPUは順番に自動で打牌します。考え中のCPUはパネルに「考え中」と表示されます。</li>
-          <li>山がなくなると流局です。テンパイ・ノーテンと点数の移動が表示され、「次の局へ」で進みます。</li>
+          <li>和了の形になると、画面下に「ツモ」（自分のツモ）または「ロン」「スキップ」（他家の捨て牌）が出ます。役がない場合とフリテンの場合は出ません。</li>
+          <li>和了すると、和了形・役・翻・符・点数・各人の点数移動が表示されます。山がなくなると流局です。</li>
           <li>東4局が終わると最終順位を表示します。</li>
         </ol>
-        <p>「オート」をオンにすると、あなたの手番もCPU（レベル1）が打牌します。キーボードでは D で打牌、S で整列、A でオートの切り替えです。対局の終了はメニュー（≡）の「対局を終了」から行えます。</p>
-        <p>この版では、ロン・ツモ和了、ポン・チー・カン、リーチ、九種九牌はまだできません（すべての局が流局で終わります）。</p>
+        <p>ロンを見送る（スキップ）と、自分の次のツモまでロンできません（同巡内フリテン）。自分の待ち牌を捨てている場合もロンできません（捨て牌フリテン）。フリテン中は状態表示に「フリテン」と出ます。</p>
+        <p><b>鳴き</b>：他家の捨て牌でポン・チー・カンができるときは「ポン」「チー」「カン」「スキップ」が出ます。チーの組み合わせが複数あるときは選択画面が出ます。鳴いた直後は、鳴いた牌と同じ牌・筋の牌は切れません（喰い替え禁止）。鳴き牌は手牌の右（CPUは伏せ牌の下）に表示し、鳴いた相手の方向の牌を横向きにします。</p>
+        <p><b>リーチ</b>：門前でテンパイになる打牌があるとき「リーチ」が出ます。押すと、切るとテンパイになる牌だけが光るので、1枚選んで切ります（「リーチ取消」で戻せます）。リーチ後は自動でツモ切りします（和了・暗槓できるときは止まります）。宣言牌は河で横向きになり、パネルにリーチ棒が出ます。</p>
+        <p><b>カン</b>：自分の番に同じ牌が4枚そろうと暗槓、ポンした牌の4枚目で加槓ができます。カンすると嶺上牌を引き、カンドラが1枚増えます。</p>
+        <p>「オート」をオンにすると、あなたの手番・鳴き・リーチもCPU（レベル2）が判断します。キーボードでは D で打牌、T でツモ、R でリーチ／ロン、P でポン、C でチー、K でカン、N でスキップ、S で整列、A でオートの切り替えです。対局の終了はメニュー（≡）の「対局を終了」から行えます。</p>
+        <p>簡略化しているルール：ダブル立直・四槓散了・四風連打・四家立直・三家和・流し満貫・包は未実装です。カンドラは明槓・加槓でもすぐにめくります。</p>
+        <p><b>操作の制限時間</b>：「設定」またはメニュー（≡）で、なし・10秒・20秒・30秒を選べます（既定はなし）。あなたの打牌・鳴きの選択に残り秒数とゲージが出て、時間切れになると打牌はツモ切り、鳴き・ロンは見送りになります。</p>
+        <h3>戦績</h3>
+        <p>東風戦を最後まで打つと、順位・最終点数・和了・放銃・リーチ・鳴きの回数、最高の和了がこの端末のブラウザーに保存され、「戦績」画面で平均順位・順位分布・各率・レベル別の成績・直近10対局を見られます。途中で「対局を終了」した対局は保存しません。何切る問題の成績は問題一覧に、すべての成績は「戦績」画面に表示されます。</p>
         <h3>テスト用の牌山</h3>
         <p>「手牌読込」で、手牌（13枚または14枚）、ツモ順、シードを指定できます。表記は <code>123m456p789s1122z</code> 形式です（m=萬子、p=筒子、s=索子、z=字牌 1〜7が東南西北白發中、0=赤5）。</p>
       </div>
@@ -473,6 +511,17 @@
   </dialog>
 
   <!-- 確認ダイアログ -->
+  <!-- 鳴きの組み合わせ・カンする牌の選択 -->
+  <dialog id="dlg-choose" class="dlg" aria-labelledby="choose-title">
+    <form method="dialog">
+      <h2 id="choose-title" class="dlg-title">選んでください</h2>
+      <div class="choose-list"></div>
+      <div class="dlg-actions">
+        <button type="submit" class="btn btn-ghost" value="cancel">キャンセル</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="dlg-confirm" class="dlg" aria-labelledby="confirm-title">
     <form method="dialog">
       <h2 id="confirm-title" class="dlg-title">確認</h2>
@@ -516,8 +565,13 @@
   <script src="js/modes/demo.js"></script>
   <script src="js/modes/nanikiru-model.js"></script>
   <script src="js/modes/nanikiru.js"></script>
+  <script src="js/agari.js"></script>
+  <script src="js/yaku.js"></script>
+  <script src="js/scoring.js"></script>
   <script src="js/game-engine.js"></script>
   <script src="js/cpu-player.js"></script>
+  <script src="js/match-stats.js"></script>
+  <script src="js/turn-timer.js"></script>
   <script src="js/modes/match.js"></script>
   <script src="js/app.js"></script>
 </body>

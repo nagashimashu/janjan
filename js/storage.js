@@ -17,13 +17,30 @@
     autoSort: true,
     separateDraw: true,
     landscapeHint: true,
+    turnTimer: '0',          // 操作の制限時間（秒）。'0' = なし
     debug: false
   };
 
   const DEFAULT_STATS = {
     demo: { deals: 0, draws: 0, discards: 0 },
     nanikiru: { attempts: 0, correct: 0, byQuestion: {} },
-    match: { games: 0, placements: [0, 0, 0, 0] }
+    match: {
+      games: 0,
+      placements: [0, 0, 0, 0],
+      totalScore: 0,          // 最終持ち点の合計（平均点の計算用）
+      rounds: 0,              // 参加した局数
+      wins: 0, tsumo: 0, ron: 0,
+      dealIns: 0,             // 放銃
+      riichi: 0,              // リーチした局数
+      called: 0,              // 鳴いた局数
+      bestHand: {},           // 最高の和了 { points, head, detail, yaku, round, date }
+      byLevel: {
+        1: { games: 0, placements: [0, 0, 0, 0] },
+        2: { games: 0, placements: [0, 0, 0, 0] },
+        3: { games: 0, placements: [0, 0, 0, 0] }
+      },
+      history: []             // 直近10対局 { date, rank, score, level, rounds }
+    }
   };
 
   /* 設定画面・対局中メニューの両方で使う定義 */
@@ -44,6 +61,9 @@
     { key: 'autoSort', label: '自動整列', type: 'toggle' },
     { key: 'separateDraw', label: 'ツモ牌を分離表示', type: 'toggle' },
     { key: 'landscapeHint', label: '横向き推奨表示', type: 'toggle', help: 'CPU四人麻雀を縦向きで開いたときに案内を表示します' },
+    { key: 'turnTimer', label: '操作の制限時間', type: 'select',
+      options: [['0', 'なし'], ['10', '10秒'], ['20', '20秒'], ['30', '30秒']],
+      help: 'CPU四人麻雀で、あなたの打牌・鳴きの選択に時間制限を付けます。時間切れはツモ切り（鳴きは見送り）' },
     { key: 'debug', label: 'デバッグ表示', type: 'toggle', help: '牌山のシードや操作ログを表示します' }
   ];
 
@@ -56,7 +76,8 @@
       const d = defaults[k];
       const v = loaded[k];
       if (v === undefined || v === null) return;
-      if (Array.isArray(d)) { if (Array.isArray(v) && v.length === d.length) out[k] = v; return; }
+      /* 配列：既定値が空なら長さは自由（履歴など）、要素があれば同じ長さのときだけ採用（順位分布など） */
+      if (Array.isArray(d)) { if (Array.isArray(v) && (d.length === 0 || v.length === d.length)) out[k] = v; return; }
       if (typeof d === 'object') { out[k] = Object.keys(d).length ? mergeKnown(d, v) : (typeof v === 'object' ? v : {}); return; }
       if (typeof v === typeof d) out[k] = v;
     });
