@@ -116,6 +116,32 @@
     return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   }
 
+  /* 種類番号 → "5m" 形式 */
+  function kindToCode(kind) {
+    const sr = suitRankOf(kind);
+    return sr.rank + MJ.SUIT_LETTER[sr.suit];
+  }
+
+  /* 種類番号 → 表示名 */
+  function kindName(kind) {
+    const sr = suitRankOf(kind);
+    return nameOf(sr.suit, sr.rank);
+  }
+
+  /* 種類番号から表示専用の牌オブジェクトを作る（受入牌の表示などに使う） */
+  function fromKind(kind, isRed) {
+    const sr = suitRankOf(kind);
+    return {
+      id: 'k' + kind + (isRed ? 'r' : ''),
+      suit: sr.suit,
+      rank: sr.rank,
+      code: sr.rank + MJ.SUIT_LETTER[sr.suit],
+      kind: kind,
+      isRed: !!isRed,
+      displayName: nameOf(sr.suit, sr.rank)
+    };
+  }
+
   /* 読み上げ用の名称 */
   function ariaLabel(tile, extra) {
     let label = tile.displayName;
@@ -134,6 +160,9 @@
     takeFromPool: takeFromPool,
     doraKindFromIndicator: doraKindFromIndicator,
     compare: compare,
-    ariaLabel: ariaLabel
+    ariaLabel: ariaLabel,
+    kindToCode: kindToCode,
+    kindName: kindName,
+    fromKind: fromKind
   };
 })(window.MJ = window.MJ || {});

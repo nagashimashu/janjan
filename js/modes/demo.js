@@ -9,8 +9,7 @@
   let selectedId = null;
   let focusId = null;
   let locked = false;       // 演出中・処理中は入力を受け付けない（二重処理防止）
-  let gesture = null;
-  let infoTimer = null;
+  let input = null;         // MJ.handInput の戻り値
   let el = null;
 
   function $(id) { return document.getElementById(id); }
@@ -34,7 +33,6 @@
       btnDiscard: $('demo-btn-discard'),
       btnSort: $('demo-btn-sort'),
       btnLoad: $('demo-btn-load'),
-      info: $('tile-info'),
       dlgLoad: $('dlg-load')
     };
 
@@ -48,20 +46,13 @@
     el.btnLoad.addEventListener('click', openLoadDialog);
     $('demo-banner-deal').addEventListener('click', function () { newDeal(); });
 
-    el.hand.addEventListener('pointerdown', onPointerDown);
-    el.hand.addEventListener('pointermove', onPointerMove);
-    el.hand.addEventListener('pointerup', onPointerUp);
-    el.hand.addEventListener('pointercancel', cancelGesture);
-    el.hand.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-    el.hand.addEventListener('click', function (e) {
-      /* ポインター操作は pointerup で処理済み。detail===0 はキーボード由来のクリック */
-      const btn = e.target.closest('.tile-btn');
-      if (btn && e.detail === 0) activate(btn.dataset.id, 'key');
-    });
-    el.hand.addEventListener('keydown', onHandKey);
-    el.hand.addEventListener('focusin', function (e) {
-      const btn = e.target.closest('.tile-btn');
-      if (btn) focusId = btn.dataset.id;
+    input = MJ.handInput.attach(el.hand, {
+      isLocked: function () { return locked || !S; },
+      canDrag: function () { return M.canDiscard(S).ok; },
+      onTap: activate,
+      onSwipe: function (id) { activate(id, 'swipe'); },
+      onInfo: showInfo,
+      onFocus: function (id) { focusId = id; }
     });
 
     setupLoadDialog();
@@ -202,25 +193,14 @@
     const check = M.canDiscard(S);
     if (!check.ok) { refuse(check.reason); return; }
 
-    const method = MJ.settings.discardMethod;
-    const guard = MJ.settings.misdiscardGuard;
-    const isSelected = selectedId === id;
-
-    if (source === 'swipe') {
-      if (method === 'confirm' || (guard && !isSelected)) { select(id); return; }
-      tryDiscard(id);
-      return;
-    }
-    if (method === 'retap' && (isSelected || !guard)) { tryDiscard(id); return; }
-    if (isSelected) { MJ.ui.toast(confirmHint()); return; }
-    select(id);
+    const action = MJ.handInput.interpret(source, selectedId === id);
+    if (action === 'commit') tryDiscard(id);
+    else if (action === 'hint') MJ.ui.toast(confirmHint());
+    else select(id);
   }
 
   function confirmHint() {
-    const method = MJ.settings.discardMethod;
-    if (method === 'retap') return 'もう一度押すと打牌します';
-    if (method === 'swipe') return '上スワイプまたは「この牌を切る」で打牌します';
-    return '「この牌を切る」で打牌します';
+    return MJ.handInput.commitHint('打牌');
   }
 
   function refuse(reason) {
@@ -323,17 +303,7 @@
   /* 画面幅に合わせて牌サイズを決める。小さすぎる場合は横スクロールへ切り替える */
   function fit() {
     if (!el || !S) return;
-    const avail = el.handZone.clientWidth - 12;
-    const base = MJ.TILE_SIZE_PX[MJ.settings.tileSize] || MJ.TILE_SIZE_PX.md;
-    const slots = 14 + (MJ.settings.separateDraw ? 0.45 : 0);
-    let w = Math.floor(avail / slots) - 2;
-    /* 手牌ゾーン全体（浮き上がり分・厚み・状態表示を含む）が画面高の約1/3に収まる大きさ */
-    const byHeight = Math.floor((window.innerHeight * 0.3 - 40) / 1.95);
-    w = Math.min(base, w, Math.max(byHeight, MJ.TILE_MIN_PX + 6));
-    const scroll = w < MJ.TILE_MIN_PX;
-    if (scroll) w = MJ.TILE_MIN_PX;
-    el.screen.style.setProperty('--tile-w', w + 'px');
-    el.hand.classList.toggle('is-scroll', scroll);
+    const w = MJ.renderer.fitHand(el.screen, el.hand, el.handZone, 14 + (MJ.settings.separateDraw ? 0.45 : 0));
 
     const riverAvail = el.riverArea.clientWidth - 16;
     /* 河は手牌より小さく、ただし縦長画面で余白がある場合は読みやすい大きさを確保する */
@@ -341,92 +311,7 @@
     el.screen.style.setProperty('--river-w', rw + 'px');
   }
 
-  /* ---------- 入力：タップ・スワイプ・長押し ---------- */
-
-  function onPointerDown(e) {
-    const btn = e.target.closest('.tile-btn');
-    if (!btn || locked) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    hideInfo();
-    gesture = { id: btn.dataset.id, btn: btn, x: e.clientX, y: e.clientY, pid: e.pointerId, moved: false, dragging: false, longPressed: false };
-    gesture.timer = setTimeout(function () {
-      if (!gesture || gesture.moved) return;
-      gesture.longPressed = true;
-      showInfo(btn);
-      MJ.ui.vibrate(8);
-    }, MJ.INPUT.longPressMs);
-  }
-
-  function onPointerMove(e) {
-    const g = gesture;
-    if (!g || e.pointerId !== g.pid) return;
-    const dx = e.clientX - g.x;
-    const dy = g.y - e.clientY; // 上方向が正
-    if (Math.abs(dx) > MJ.INPUT.tapSlop || Math.abs(dy) > MJ.INPUT.tapSlop) {
-      g.moved = true;
-      clearTimeout(g.timer);
-    }
-    /* 縦方向が優勢な上向きの動きだけを打牌スワイプとして追従させる */
-    if (!g.dragging && dy > MJ.INPUT.tapSlop && dy > Math.abs(dx) * 1.2 && M.canDiscard(S).ok) {
-      g.dragging = true;
-      g.btn.classList.add('is-dragging');
-      try { g.btn.setPointerCapture(g.pid); } catch (err) { /* 未対応ブラウザーでは無視 */ }
-    }
-    if (g.dragging) {
-      const lift = Math.max(0, Math.min(dy, MJ.INPUT.swipeFollowMax));
-      g.btn.style.transform = 'translateY(' + (-lift) + 'px)';
-      g.btn.classList.toggle('is-armed', dy >= MJ.INPUT.swipeDiscard);
-    }
-  }
-
-  function onPointerUp(e) {
-    const g = gesture;
-    if (!g || e.pointerId !== g.pid) return;
-    gesture = null;
-    clearTimeout(g.timer);
-    if (g.longPressed) { scheduleHideInfo(); return; }
-    const dy = g.y - e.clientY;
-    if (g.dragging) {
-      const armed = dy >= MJ.INPUT.swipeDiscard;
-      resetDrag(g.btn, !armed);
-      if (armed) activate(g.id, 'swipe');
-      return;
-    }
-    if (!g.moved) activate(g.id, 'tap');
-  }
-
-  function cancelGesture() {
-    if (!gesture) return;
-    clearTimeout(gesture.timer);
-    resetDrag(gesture.btn, true);
-    gesture = null;
-  }
-
-  function resetDrag(btn, animateBack) {
-    const current = btn.style.transform;
-    btn.style.transform = '';
-    btn.classList.remove('is-dragging', 'is-armed');
-    if (animateBack && current && MJ.anim.factor() > 0 && btn.animate) {
-      btn.animate([{ transform: current }, { transform: 'translateY(0)' }], { duration: MJ.anim.ms(200), easing: 'ease-out' });
-    }
-  }
-
-  function onHandKey(e) {
-    const btns = Array.prototype.slice.call(el.hand.querySelectorAll('.tile-btn'));
-    const idx = btns.indexOf(document.activeElement);
-    if (idx < 0) return;
-    let next = -1;
-    if (e.key === 'ArrowRight') next = Math.min(btns.length - 1, idx + 1);
-    else if (e.key === 'ArrowLeft') next = Math.max(0, idx - 1);
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = btns.length - 1;
-    else if (e.key === 'i' || e.key === 'I') { showInfo(btns[idx]); scheduleHideInfo(); e.preventDefault(); return; }
-    if (next < 0) return;
-    e.preventDefault();
-    btns.forEach(function (b, i) { b.tabIndex = i === next ? 0 : -1; });
-    btns[next].focus();
-    focusId = btns[next].dataset.id;
-  }
+  /* ---------- 入力（タップ・スワイプ・長押しの検出は MJ.handInput） ---------- */
 
   /* 画面全体のショートカット（入力欄・ダイアログ操作中は app.js 側で除外） */
   function onKey(e) {
@@ -436,8 +321,7 @@
     else if (k === 'd' && selectedId) { tryDiscard(selectedId); e.preventDefault(); }
   }
 
-  /* ---------- 牌の補足情報（長押し／Iキー） ---------- */
-
+  /* 牌の補足情報（長押し／Iキー） */
   function showInfo(btn) {
     const tile = M.findTile(S, btn.dataset.id);
     if (!tile) return;
@@ -445,34 +329,11 @@
     if (tile.isRed) notes.push('赤ドラ（+1翻）');
     if (M.doraKinds(S).indexOf(tile.kind) >= 0) notes.push('ドラ');
     if (S.drawn && S.drawn.id === tile.id) notes.push('ツモ牌');
-    el.info.innerHTML = '';
-    const title = document.createElement('strong');
-    title.textContent = tile.displayName;
-    const code = document.createElement('span');
-    code.className = 'tile-info-code';
-    code.textContent = tile.code;
-    el.info.append(title, code);
-    if (notes.length) {
-      const p = document.createElement('span');
-      p.textContent = notes.join(' / ');
-      el.info.append(p);
-    }
-    const r = btn.getBoundingClientRect();
-    const x = Math.max(80, Math.min(window.innerWidth - 80, r.left + r.width / 2));
-    el.info.style.left = x + 'px';
-    el.info.style.top = (r.top - 6) + 'px';
-    el.info.hidden = false;
-    MJ.ui.announce(tile.displayName + (notes.length ? '、' + notes.join('、') : ''));
-  }
-
-  function scheduleHideInfo() {
-    clearTimeout(infoTimer);
-    infoTimer = setTimeout(hideInfo, MJ.INPUT.infoHideMs);
+    MJ.tileInfo.show(btn, tile.displayName, tile.code, notes);
   }
 
   function hideInfo() {
-    clearTimeout(infoTimer);
-    if (el && el.info) el.info.hidden = true;
+    MJ.tileInfo.hide();
   }
 
   /* ---------- 手牌読込ダイアログ（テスト用固定牌山） ---------- */
@@ -529,7 +390,7 @@
     },
     leave: function () {
       hideInfo();
-      cancelGesture();
+      if (input) input.cancel();
       MJ.debug.setProvider(null);
     },
     onResize: function () { hideInfo(); fit(); },

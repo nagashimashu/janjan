@@ -18,10 +18,11 @@
   MJ.RULE_INFO = [
     { key: 'redDora', label: '赤ドラ', value: '5萬・5筒・5索 各1枚', status: 'active',
       note: '牌の生成に反映（牌操作デモで確認できます）' },
-    { key: 'matchLength', label: '対局の長さ', value: '東風戦', status: 'planned', note: 'CPU四人麻雀（フェーズ3〜6）で有効化' },
-    { key: 'startScore', label: '持ち点', value: '25,000点', status: 'planned', note: 'CPU四人麻雀で有効化' },
-    { key: 'kuitan', label: '喰いタン', value: 'あり', status: 'planned', note: '役判定（フェーズ4）で有効化' },
+    { key: 'matchLength', label: '対局の長さ', value: '東風戦', status: 'active', note: '東4局で親が流れると終了。0点未満（トビ）でも終了' },
+    { key: 'startScore', label: '持ち点', value: '25,000点', status: 'active', note: 'CPU四人麻雀に反映' },
+    { key: 'notenPenalty', label: 'ノーテン罰符', value: '場に3,000点', status: 'active', note: '山切れの流局時。親テンパイで連荘、流局ごとに本場+1' },
+    { key: 'kuitan', label: '喰いタン', value: 'あり', status: 'planned', note: '鳴き（フェーズ5）・役判定（フェーズ4）で有効化' },
     { key: 'abortiveDraws', label: '九種九牌', value: 'あり', status: 'planned', note: '途中流局（フェーズ5）で有効化' },
-    { key: 'turnTimerSec', label: '操作制限時間', value: 'なし', status: 'planned', note: 'CPU四人麻雀で有効化（時間切れはツモ切り）' }
+    { key: 'turnTimerSec', label: '操作制限時間', value: 'なし', status: 'planned', note: '未実装（時間切れはツモ切りの予定）' }
   ];
 })(window.MJ = window.MJ || {});

@@ -13,7 +13,7 @@
     sound: true,
     volume: 0.6,
     animSpeed: 'normal',     // normal / fast / minimal
-    cpuSpeed: 'normal',      // instant / normal / slow（CPU対局の実装後に有効）
+    cpuSpeed: 'normal',      // instant / normal / slow
     autoSort: true,
     separateDraw: true,
     landscapeHint: true,
@@ -22,7 +22,7 @@
 
   const DEFAULT_STATS = {
     demo: { deals: 0, draws: 0, discards: 0 },
-    nanikiru: { attempts: 0, best: 0, byQuestion: {} },
+    nanikiru: { attempts: 0, correct: 0, byQuestion: {} },
     match: { games: 0, placements: [0, 0, 0, 0] }
   };
 
@@ -40,10 +40,10 @@
     { key: 'animSpeed', label: '演出速度', type: 'select',
       options: [['normal', '標準'], ['fast', '高速'], ['minimal', '演出少なめ']] },
     { key: 'cpuSpeed', label: 'CPU思考時間', type: 'select',
-      options: [['instant', '即時'], ['normal', '標準'], ['slow', 'ゆっくり']], help: 'CPU四人麻雀の実装後に有効になります' },
+      options: [['instant', '即時'], ['normal', '標準'], ['slow', 'ゆっくり']], help: 'CPU四人麻雀でCPUが打牌するまでの間' },
     { key: 'autoSort', label: '自動整列', type: 'toggle' },
     { key: 'separateDraw', label: 'ツモ牌を分離表示', type: 'toggle' },
-    { key: 'landscapeHint', label: '横向き推奨表示', type: 'toggle', help: 'CPU四人麻雀の実装後に有効になります' },
+    { key: 'landscapeHint', label: '横向き推奨表示', type: 'toggle', help: 'CPU四人麻雀を縦向きで開いたときに案内を表示します' },
     { key: 'debug', label: 'デバッグ表示', type: 'toggle', help: '牌山のシードや操作ログを表示します' }
   ];
 

@@ -63,7 +63,26 @@
     return created;
   }
 
+  /*
+   * 画面幅に合わせて手牌の牌幅（--tile-w）を決める。slots は牌何枚分の幅が必要か。
+   * 手牌ゾーン全体（浮き上がり分・厚み・状態表示を含む）が画面高の約1/3に収まる大きさに抑え、
+   * それでも MJ.TILE_MIN_PX 未満になる場合は手牌を横スクロールにする。
+   */
+  function fitHand(screen, hand, zone, slots, heightRatio) {
+    const avail = zone.clientWidth - 12;
+    const base = MJ.TILE_SIZE_PX[MJ.settings.tileSize] || MJ.TILE_SIZE_PX.md;
+    let w = Math.floor(avail / slots) - 2;
+    const byHeight = Math.floor((window.innerHeight * (heightRatio || 0.3) - 40) / 1.95);
+    w = Math.min(base, w, Math.max(byHeight, MJ.TILE_MIN_PX + 6));
+    const scroll = w < MJ.TILE_MIN_PX;
+    if (scroll) w = MJ.TILE_MIN_PX;
+    screen.style.setProperty('--tile-w', w + 'px');
+    hand.classList.toggle('is-scroll', scroll);
+    return w;
+  }
+
   MJ.renderer = {
+    fitHand: fitHand,
     createHandTile: createHandTile,
     createStaticTile: createStaticTile,
     createBackTile: createBackTile,

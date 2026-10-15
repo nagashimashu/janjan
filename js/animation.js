@@ -91,6 +91,31 @@
     });
   }
 
+  /*
+   * 回転したコンテナの中の要素（卓の河など）を、画面上の fromRect から現在位置へ飛ばす。
+   * 移動量を画面座標からコンテナの座標系（angleDeg だけ回転）へ変換して、要素そのものを動かす。
+   */
+  function flyFromRotated(el, fromRect, angleDeg, o) {
+    const opt = o || {};
+    if (!canAnimate(el) || !fromRect) return Promise.resolve();
+    const now = el.getBoundingClientRect();
+    const sx = (fromRect.left + fromRect.width / 2) - (now.left + now.width / 2);
+    const sy = (fromRect.top + fromRect.height / 2) - (now.top + now.height / 2);
+    const a = -(angleDeg || 0) * Math.PI / 180;
+    const lx = sx * Math.cos(a) - sy * Math.sin(a);
+    const ly = sx * Math.sin(a) + sy * Math.cos(a);
+    const spin = opt.spin || 0;
+    const duration = ms(opt.duration || 360);
+    el.style.zIndex = '5';
+    const anim = el.animate([
+      { transform: 'translate(' + lx + 'px,' + ly + 'px) rotate(0deg) scale(1.25)', opacity: 0.6 },
+      { offset: 0.75, transform: 'translate(' + (lx * 0.1) + 'px,' + (ly * 0.1) + 'px) rotate(' + (spin * 0.95) + 'deg) scale(1.08)', opacity: 1 },
+      { transform: 'translate(0,0) rotate(' + spin + 'deg) scale(1)', opacity: 1 }
+    ], { duration: duration, easing: 'cubic-bezier(.25,.8,.25,1)' });
+    const timeout = new Promise(function (resolve) { setTimeout(resolve, duration + 150); });
+    return Promise.race([anim.finished.catch(function () {}), timeout]).then(function () { el.style.zIndex = ''; });
+  }
+
   /* 配牌：順番に滑り込ませる */
   function dealIn(elements, stagger) {
     if (factor() === 0) return;
@@ -151,6 +176,7 @@
     capture: capture,
     flip: flip,
     flyFrom: flyFrom,
+    flyFromRotated: flyFromRotated,
     dealIn: dealIn,
     pulse: pulse,
     burst: burst,

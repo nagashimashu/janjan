@@ -8,12 +8,17 @@
   const $ = function (sel, root) { return (root || document).querySelector(sel); };
   const $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
-  const ROUTES = ['title', 'modes', 'demo', 'nanikiru', 'cpu', 'rules', 'settings', 'stats', 'howto', 'about'];
+  const ROUTES = ['title', 'modes', 'demo', 'nanikiru', 'nanikiru-play', 'cpu', 'rules', 'settings', 'stats', 'howto', 'about'];
   const MENU_KEYS = ['volume', 'sound', 'vibration', 'animSpeed', 'discardMethod', 'misdiscardGuard'];
 
   MJ.settings = MJ.storage.loadSettings();
   MJ.stats = MJ.storage.loadStats();
-  MJ.screens = { demo: MJ.demo };
+  MJ.screens = {
+    demo: MJ.demo,
+    nanikiru: MJ.nanikiru.list,
+    'nanikiru-play': MJ.nanikiru.play,
+    cpu: MJ.match
+  };
 
   MJ.saveStats = function () { MJ.storage.saveStats(MJ.stats); };
 
@@ -49,7 +54,9 @@
       setTimeout(function () { live.textContent = message; }, 30);
     },
     vibrate: function (ms) {
-      if (MJ.settings.vibration && navigator.vibrate) {
+      /* ブラウザーはユーザー操作前の振動を拒否する（警告が出る）ため、操作済みのときだけ呼ぶ */
+      const activated = !navigator.userActivation || navigator.userActivation.hasBeenActive;
+      if (MJ.settings.vibration && navigator.vibrate && activated) {
         try { navigator.vibrate(ms); } catch (e) { /* 未対応端末 */ }
       }
     },
@@ -151,7 +158,11 @@
       '<div><dt>配牌回数</dt><dd>' + s.demo.deals + '</dd></div>' +
       '<div><dt>ツモ回数</dt><dd>' + s.demo.draws + '</dd></div>' +
       '<div><dt>打牌回数</dt><dd>' + s.demo.discards + '</dd></div></dl></div>' +
-      '<div class="stat-card is-planned"><h3>何切る問題</h3><p><span class="badge badge-planned">未実装</span> フェーズ2で正答数・挑戦数・正答率を記録します。</p></div>' +
+      '<div class="stat-card"><h3>何切る問題</h3><dl>' +
+      '<div><dt>挑戦数</dt><dd>' + s.nanikiru.attempts + '</dd></div>' +
+      '<div><dt>正答数（最有力・有力）</dt><dd>' + s.nanikiru.correct + '</dd></div>' +
+      '<div><dt>正答率</dt><dd>' + (s.nanikiru.attempts ? MJ.nanikiruModel.accuracy(s.nanikiru) + '%' : '—') + '</dd></div>' +
+      '<div><dt>挑戦した問題</dt><dd>' + Object.keys(s.nanikiru.byQuestion).length + ' / ' + MJ.QUESTIONS.length + '</dd></div></dl></div>' +
       '<div class="stat-card is-planned"><h3>CPU四人麻雀</h3><p><span class="badge badge-planned">未実装</span> フェーズ6で対局数・順位分布を記録します。</p></div>';
   }
 
@@ -221,18 +232,23 @@
   /* ---------- ルーター ---------- */
 
   let currentRoute = null;
+  let currentParam = null;
 
+  /* "#/demo" → { name: 'demo' }、"#/nanikiru/Q003" → { name: 'nanikiru-play', param: 'Q003' } */
   function routeFromHash() {
-    const name = window.location.hash.replace(/^#\/?/, '');
-    return ROUTES.indexOf(name) >= 0 ? name : 'title';
+    const path = window.location.hash.replace(/^#\/?/, '');
+    const m = /^nanikiru\/([A-Za-z0-9_-]+)$/.exec(path);
+    if (m) return { name: 'nanikiru-play', param: m[1] };
+    return { name: ROUTES.indexOf(path) >= 0 && path !== 'nanikiru-play' ? path : 'title', param: null };
   }
 
-  function show(name) {
-    if (name === currentRoute) return;
+  function show(name, param) {
+    if (name === currentRoute && (param || null) === currentParam) return;
     const prevHooks = MJ.screens[currentRoute];
     if (prevHooks && prevHooks.leave) prevHooks.leave();
     $$('[data-screen]').forEach(function (sec) { sec.hidden = sec.dataset.screen !== name; });
     currentRoute = name;
+    currentParam = param || null;
     document.body.dataset.route = name;
 
     if (name === 'stats') renderStats();
@@ -240,7 +256,7 @@
     if (name === 'about') renderChangelog();
 
     const hooks = MJ.screens[name];
-    if (hooks && hooks.enter) hooks.enter();
+    if (hooks && hooks.enter) hooks.enter(param);
 
     const sec = $('[data-screen="' + name + '"]');
     const heading = sec && $('h1, h2', sec);
@@ -274,7 +290,15 @@
         navigate(nav.dataset.nav);
         return;
       }
-      if (e.target.closest('[data-open-menu]')) $('#dlg-menu').showModal();
+      if (e.target.closest('[data-open-menu]')) {
+        /* 対局中だけ「対局を終了」を出す（終了は確認ダイアログを経る） */
+        $('#menu-quit-match').hidden = !(currentRoute === 'cpu' && MJ.match.isActive());
+        $('#dlg-menu').showModal();
+      }
+      if (e.target.closest('#menu-quit-match')) {
+        $('#dlg-menu').close();
+        MJ.match.quit();
+      }
       if (e.target.closest('[data-reset-data]')) resetData();
     });
 
@@ -305,8 +329,9 @@
     window.addEventListener('orientationchange', relayout);
     MJ.anim.onReducedMotionChange(applySettings);
 
-    window.addEventListener('hashchange', function () { show(routeFromHash()); });
-    show(routeFromHash());
+    window.addEventListener('hashchange', function () { const r = routeFromHash(); show(r.name, r.param); });
+    const first = routeFromHash();
+    show(first.name, first.param);
   }
 
   document.addEventListener('DOMContentLoaded', init);

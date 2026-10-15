@@ -1,39 +1,53 @@
 # スキル：何切る問題を追加する
 
-> 前提：フェーズ2で `data/questions.js`（`MJ.QUESTIONS` 配列）と `js/shanten.js`・`js/ukeire.js` が実装済みであること。
+問題は `data/questions.js` の `MJ.QUESTIONS` 配列に追加する。
 
 ## 手順
 
-1. `data/questions.js` の末尾に問題オブジェクトを追加する。`id` は `Q` ＋3桁の連番（既存と重複させない）。
-2. 手牌・ドラ表示牌は `123m406p11z` 形式で書く（0＝赤5）。手牌は必ず14枚。
-3. 候補（`candidates`）のシャンテン数・受入牌・受入枚数は **手計算で書かず**、ブラウザーのコンソールで `MJ.ukeire` の計算結果を使う。
-4. `grade` は `best`（最有力）／`good`（有力）／`situational`（目的によって選択可能）／`improve`（改善余地あり）のいずれか。
-5. 解説には、シャンテン数・受入枚数・打点・守備力・形の良さ・巡目・ドラ・場況のうち、判断に効いた観点を書く。
-6. **レビュー前は `reviewed: false`** にする（画面に「確認中」と表示される）。人が確認したら `true` にし、`reviewerNote` に確認内容を書く。
+1. 手牌（14枚）・ドラ表示牌・見えている牌を決め、分析ツールで全打牌の計算値を出す。
+
+   ```bash
+   node tools/question-tool.js --hand 23456m78p345678s4z --dora 1p --visible 3s
+   ```
+
+   出力の `{ discard: ..., shanten: ..., ukeireCount: ..., ukeire: [...] }` をそのまま `candidates` に貼る。**シャンテン数・受入を手で数えない。**
+2. `id` は `Q` ＋3桁の連番（既存と重複させない）。牌は `123m406p11z` 形式（0＝赤5、z は 1〜7 が東南西北白發中）。
+3. 候補ごとに `grade` を付ける：`best`（最有力）／`good`（有力）／`situational`（目的によって選択可能）／`improve`（改善余地あり）。`best` は1つ以上必要。候補に無い打牌は画面上で自動的に「改善余地あり」になる。
+4. 候補ごとの `note`、`explanation`（解説）、`perspectives`（打点・守備力・形の良さ・巡目・ドラ・場況）、`yakuTargets`、`supplement` を書く。シャンテン数と受入枚数の観点は画面が計算値から自動で表示する。
+5. 他家の河など、残り枚数に影響する牌は `visible` に書き、`situation` に状況を文章で書く。
+6. **`reviewed: false`** にする（画面に「確認中」と表示される）。人が確認したら `true` にし、`reviewerNote` に確認内容を書く。
 7. `lastUpdated` を今日の日付（YYYY-MM-DD）にする。
-8. `node tests/run-node.js` を実行し、問題データ検証テスト（全問題の枚数・形式・計算値の一致）が成功することを確認する。
+8. 検証とテストを実行し、すべて成功することを確認する。
+
+   ```bash
+   node tools/question-tool.js
+   node tests/run-node.js
+   ```
 
 ## 雛形
 
 ```javascript
 {
   id: 'Q011',
+  title: 'テーマ（回答後に表示）',
   difficulty: 'normal',            // easy / normal / hard
   hand: '234m067p3345s1177z',      // 14枚
-  seatWind: 'south',
+  seatWind: 'south',               // east / south / west / north
   roundWind: 'east',
   doraIndicators: ['4s'],
   turn: 7,
-  remaining: {},                   // 見えている牌で減らす場合のみ。例 { '5s': 2 }
+  visible: '',                     // 見えている牌（残り枚数から差し引く）。例 '5s5s2p'
+  situation: '',                   // 例 '対面がリーチ。対面の河：…'
   candidates: [
-    { discard: '1z', grade: 'best', shanten: 1, ukeire: ['5m', '8p'], ukeireCount: 16, note: '' }
+    { discard: '1z', grade: 'best', shanten: 1, ukeireCount: 16, ukeire: ['5m', '8p'], note: '' }
   ],
   yakuTargets: ['断么九'],
   explanation: '',
+  perspectives: { value: '', defense: '', shape: '', turn: '', dora: '', situation: '' },
   supplement: '',
   reviewed: false,
   reviewerNote: '',
-  lastUpdated: '2026-09-29'
+  lastUpdated: '2026-10-15'
 }
 ```
 
@@ -41,3 +55,4 @@
 
 - AI が生成した推奨打牌や解説を、確認せずに `reviewed: true` にする
 - 既存の書籍・サイトの問題文や解説をそのまま転載する
+- テストを通すために計算値を書き換える（計算値がおかしいと思ったら `js/shanten.js` のテストを追加して原因を調べる）

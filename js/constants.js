@@ -2,7 +2,7 @@
 (function (MJ) {
   'use strict';
 
-  MJ.VERSION = '0.1.0';
+  MJ.VERSION = '0.3.0';
   MJ.APP_NAME = '星翠麻雀';
   MJ.APP_NAME_EN = 'SEISUI MAHJONG';
 
